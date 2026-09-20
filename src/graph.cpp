@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <vector>
 #include <queue>
+#include <cassert>
 
 using namespace std;
 
@@ -116,6 +117,10 @@ vector<vector<int>> Grafo::get_matriz_adj() const {
 #pragma region Construção do Grafo
 
 void Grafo::add_edge(int u, int v) {
+    assert(u && v);
+    assert(1 <= u && u <= n);
+    assert(1 <= v && v <= n);
+
     adj[u].push_back(v);
     adj[v].push_back(u);
 
@@ -149,9 +154,7 @@ void Grafo::build() {
     sort(ord_graus.begin(), ord_graus.end());
 
     if (n % 2 == 0) {
-        mediana_val =
-            (ord_graus[n / 2 - 1] + ord_graus[n / 2])
-            / 2.0;
+        mediana_val = (ord_graus[n / 2 - 1] + ord_graus[n / 2])/ 2.0;
     } else {
         mediana_val = ord_graus[n / 2];
     }
@@ -193,7 +196,7 @@ void Grafo::dfs(
     vector<int>& dist
 ) {
     pai.assign(n + 1, 0);
-    dist.assign(n + 1, 0);
+    dist.assign(n + 1, inf);
 
     pai[start] = start;
 
@@ -206,12 +209,11 @@ void Grafo::bfs(
     vector<int>& dist
 ) {
     pai.assign(n + 1, 0);
-    dist.assign(n + 1, 0);
+    dist.assign(n + 1, inf);
 
     queue<int> fila;
 
     fila.push(start);
-
     pai[start] = start;
     dist[start] = 0;
 
@@ -220,12 +222,10 @@ void Grafo::bfs(
         fila.pop();
 
         for (int prox : adj[v]) {
-            if (pai[prox])
-                continue;
+            if(pai[prox]) continue;
 
             dist[prox] = dist[v] + 1;
             pai[prox] = v;
-
             fila.push(prox);
         }
     }
@@ -233,36 +233,36 @@ void Grafo::bfs(
 
 int Grafo::get_dist(int u, int v) {
     vector<int> p, d;
-
     bfs(u, p, d);
-
-    return d[v];
+    return d[v] != inf ? d[v] : -1;
 }
 
 int Grafo::get_diameter() {
     vector<int> p, d;
 
-    if (is_a_tree(1, p, d)) {
-        int v1 =
-            max_element(d.begin() + 1, d.end())
-            - d.begin();
-
-        bfs(v1, p, d);
-
-        return *max_element(d.begin() + 1, d.end());
-    }
-
     int asw = 0;
+    for(vector<int> &component: get_components()){
+        bfs(component[0], p, d);
+        int best=component[0];
+        
+        for(int v=1; v<=n; v++){
+            if(d[v] == inf) continue;
+            if(d[best] < d[v]){
+                best = v;
+            }
+        }
+        
+        bfs(best, p, d);
+        
+        for(int v=1; v<=n; v++){
+            if(d[v] == inf) continue;
+            if(d[best] < d[v]){
+                best = v;
+            }
+        }
 
-    for (int v = 1; v <= n; v++) {
-        bfs(v, p, d);
-
-        asw = max(
-            asw,
-            *max_element(d.begin() + 1, d.end())
-        );
+        asw = max(asw, d[best]);
     }
-
     return asw;
 }
 
