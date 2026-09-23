@@ -269,7 +269,6 @@ def plot_dfs_comparison(data_list, scale="linear"):
     plt.savefig(os.path.join(OUTPUT_DIR, f"07_dfs_comparacao_tempos{suffix}.png"), dpi=300)
     plt.close()
 
-
 if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     data_list = load_all_data()

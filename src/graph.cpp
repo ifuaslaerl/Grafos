@@ -41,20 +41,17 @@ vector<int> Grafo::traverse_impl(
     vector<int>& pai,
     vector<int>& dist,
     Fronteira& f
-) {
+){
     vector<int> comp;
-
     f.push(start, start);
+    dist[start] = -1;
 
     while(!f.empty()){
         auto [v, p] = f.pop();
-
-        // MARCAÇÃO NO POP
         if(pai[v]) continue;
         
         pai[v] = p;
-        dist[v] = (v == start) ? 0 : dist[p] + 1;
-        
+        dist[v] = dist[p] + 1;
         comp.push_back(v);
 
         for(int prox : adj[v]){
@@ -168,7 +165,11 @@ vector<vector<int>> Grafo::get_components(){
     return asw;
 }
 
-vector<int> Grafo::dfs(int start, vector<int>& pai, vector<int>& dist){
+vector<int> Grafo::dfs(
+    int start, 
+    vector<int>& pai, 
+    vector<int>& dist
+){
     pai.assign(n + 1, 0);
     dist.assign(n + 1, inf);
     
@@ -176,7 +177,11 @@ vector<int> Grafo::dfs(int start, vector<int>& pai, vector<int>& dist){
     return traverse_impl(start, pai, dist, pilha);
 }
 
-vector<int> Grafo::bfs(int start, vector<int>& pai, vector<int>& dist){
+vector<int> Grafo::bfs(
+    int start,
+    vector<int>& pai, 
+    vector<int>& dist
+){
     pai.assign(n + 1, 0);
     dist.assign(n + 1, inf);
     
