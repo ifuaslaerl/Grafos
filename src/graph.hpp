@@ -34,6 +34,8 @@ private:
         Fronteira& fronteira
     );
 
+    void dfs_recursiva_util(int u, int pai, int dist_atual, std::vector<int>& p, std::vector<int>& d, std::vector<bool>& vis, std::vector<int>& ordem);
+
 public:
     Grafo(int n_);
 
@@ -68,6 +70,8 @@ public:
         vector<int>& dist
     );
 
+    vector<int> dfs_recursiva(int start, std::vector<int>& p, std::vector<int>& d);
+    
     vector<int> bfs(
         int start,
         vector<int>& pai,

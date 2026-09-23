@@ -83,7 +83,7 @@ int main() {
     cout << "Tamanho Maior Comp.: " << max_comp_size << " vértices (" << fixed << setprecision(2) << percent_max_comp << "% do grafo)\n";
     cout << "Diâmetro Aproximado: " << diametro << "\n\n";
 
-    // 4. ESTUDO DE CASO: BFS E DFS (Origens 1, 2 e 3 -> Destinos 10, 20 e 30)
+    // 4. ESTUDO DE CASO: BFS E DFS
     cout << "[ PAIS E DISTÂNCIAS DOS VÉRTICES (BFS / DFS) ]\n";
     vector<int> origens = {1, 2, 3};
     vector<int> destinos = {10, 20, 30};
@@ -115,7 +115,7 @@ int main() {
             if (dest > n) continue;
             
             cout << "  -> Destino " << dest << ":\n";
-            if (dist_bfs[dest] > n) { 
+            if (dist_bfs[dest] > n || dist_bfs[dest] == -1) { 
                 cout << "     Status: Inalcançável\n";
             } else {
                 cout << "     Pai       : " << pai_bfs[dest] << " (BFS) / " << pai_dfs[dest] << " (DFS)\n";
@@ -155,10 +155,47 @@ int main() {
     }
     cout << "\n";
 
+    // 7. COMPARAÇÃO DFS ITERATIVA VS RECURSIVA
+    cout << "[ COMPARAÇÃO DFS: ITERATIVA VS RECURSIVA ]\n";
+    if (n > 0) {
+        double time_dfs_iter = 0;
+        double time_dfs_rec = 0;
+        int benchmark_runs = 100; // Conforme exigido no roteiro
+
+        double mem_base = get_peak_memory_mb();
+
+        // Benchmark Iterativa
+        for (int i = 0; i < benchmark_runs; i++) {
+            auto s1 = high_resolution_clock::now();
+            vector<int> ordem_iter = G.dfs(1, pai_dfs, dist_dfs);
+            auto e1 = high_resolution_clock::now();
+            time_dfs_iter += duration<double, milli>(e1 - s1).count();
+        }
+        double mem_pos_iter = get_peak_memory_mb();
+
+        // Benchmark Recursiva
+        double mem_pos_rec = mem_pos_iter;
+        for (int i = 0; i < benchmark_runs; i++) {
+            auto s2 = high_resolution_clock::now();
+            vector<int> ordem_rec = G.dfs_recursiva(1, pai_dfs, dist_dfs);
+            auto e2 = high_resolution_clock::now();
+            time_dfs_rec += duration<double, milli>(e2 - s2).count();
+        }
+        mem_pos_rec = get_peak_memory_mb();
+
+        cout << "Execuções de Teste: " << benchmark_runs << " runs\n";
+        cout << "DFS Iterativa     : " << fixed << setprecision(3) << (time_dfs_iter / benchmark_runs) << " ms (média)\n";
+        cout << "Pico RAM Iterativa: " << mem_pos_iter << " MB (Aumento na Heap: " << max(0.0, mem_pos_iter - mem_base) << " MB)\n";
+        
+        cout << "DFS Recursiva     : " << fixed << setprecision(3) << (time_dfs_rec / benchmark_runs) << " ms (média)\n";
+        cout << "Pico RAM Recursiva: " << mem_pos_rec << " MB (Excedente na Call Stack: " << max(0.0, mem_pos_rec - mem_pos_iter) << " MB)\n";
+    }
+    cout << "\n";
+
     auto end_total = high_resolution_clock::now();
     double time_total = duration<double, milli>(end_total - start_total).count();
 
-    // 7. TELEMETRIA FINAL
+    // 8. TELEMETRIA FINAL
     cout << "[ TELEMETRIA DE PERFORMANCE ]\n";
     cout << "Tempo Construção  : " << fixed << setprecision(3) << time_build << " ms\n";
     cout << "Tempo Graus       : " << time_grau << " ms\n";
@@ -172,7 +209,7 @@ int main() {
     cout << "Tempo Diâmetro    : " << time_diam << " ms\n";
     cout << "--------------------------------------------------\n";
     cout << "TEMPO TOTAL GASTO : " << time_total << " ms\n";
-    cout << "PICO DE MEMÓRIA   : " << get_peak_memory_mb() << " MB\n";
+    cout << "PICO TOTAL DE RAM : " << get_peak_memory_mb() << " MB\n";
     cout << "==================================================\n";
 
     return 0;

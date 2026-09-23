@@ -218,4 +218,35 @@ int Grafo::get_diameter() {
     return asw;
 }
 
+void Grafo::dfs_recursiva_util(int u, int pai, int dist_atual, vector<int>& p, vector<int>& d, vector<bool>& vis, vector<int>& ordem) {
+    vis[u] = true;
+    p[u] = pai;
+    d[u] = dist_atual;
+    
+    // Captura o vértice no momento exato da visita
+    ordem.push_back(u);
+
+    for (int vizinho : adj[u]) {
+        if (!vis[vizinho]) {
+            dfs_recursiva_util(vizinho, u, dist_atual + 1, p, d, vis, ordem);
+        }
+    }
+}
+
+vector<int> Grafo::dfs_recursiva(int start, vector<int>& p, vector<int>& d) {
+    p.assign(n + 1, 0);
+    d.assign(n + 1, -1);
+    vector<bool> vis(n + 1, false);
+    vector<int> ordem_visita;
+    
+    // Reserva espaço na memória para evitar realocações excessivas do vector
+    ordem_visita.reserve(n);
+    
+    if (start <= n && start > 0) {
+        dfs_recursiva_util(start, 0, 0, p, d, vis, ordem_visita);
+    }
+    
+    return ordem_visita;
+}
+
 #pragma endregion
