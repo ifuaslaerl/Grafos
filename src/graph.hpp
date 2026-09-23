@@ -2,9 +2,21 @@
 #define GRAFO_HPP
 
 #include <vector>
+#include <utility>
+
+using namespace std;
 
 typedef long double ld;
 typedef long long ll;
+
+// Fronteira carrega o par: (Vértice Atual, Pai que o descobriu)
+class Fronteira {
+public:
+    virtual void push(int v, int p) = 0;
+    virtual pair<int, int> pop() = 0;
+    virtual bool empty() = 0;
+    virtual ~Fronteira() = default;
+};
 
 class Grafo {
 private:
@@ -12,25 +24,14 @@ private:
     int menor, maior, total;
     ld mediana_val;
 
-    std::vector<int> grau;
-    std::vector<std::vector<int>> adj;
+    vector<int> grau;
+    vector<vector<int>> adj;
 
-    void dfs_componentes(
-        int v,
-        std::vector<int>& c,
-        std::vector<int>& vis
-    );
-
-    void dfs_impl(
-        int v,
-        std::vector<int>& pai,
-        std::vector<int>& dist
-    );
-
-    bool is_a_tree(
-        int v,
-        std::vector<int>& pai,
-        std::vector<int>& dist
+    vector<int> traverse_impl(
+        int start,
+        vector<int>& pai,
+        vector<int>& dist,
+        Fronteira& fronteira
     );
 
 public:
@@ -45,9 +46,8 @@ public:
     ld get_grau_medio() const;
     ld get_grau_mediano() const;
 
-    const std::vector<std::vector<int>>& get_lista_adj() const;
-
-    std::vector<std::vector<int>> get_matriz_adj() const;
+    const vector<vector<int>>& get_lista_adj() const;
+    vector<vector<int>> get_matriz_adj() const;
 
     #pragma endregion
 
@@ -60,18 +60,18 @@ public:
 
     #pragma region Algoritmos em Grafos
 
-    std::vector<std::vector<int>> get_components();
+    vector<vector<int>> get_components();
 
-    void dfs(
+    vector<int> dfs(
         int start,
-        std::vector<int>& pai,
-        std::vector<int>& dist
+        vector<int>& pai,
+        vector<int>& dist
     );
 
-    void bfs(
+    vector<int> bfs(
         int start,
-        std::vector<int>& pai,
-        std::vector<int>& dist
+        vector<int>& pai,
+        vector<int>& dist
     );
 
     int get_dist(int u, int v);

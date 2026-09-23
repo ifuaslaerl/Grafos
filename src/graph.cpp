@@ -1,58 +1,70 @@
 #include "graph.hpp"
 #include <algorithm>
-#include <vector>
 #include <queue>
+#include <stack>
 #include <cassert>
-
-using namespace std;
 
 const int inf = 2e9;
 
+#pragma region Fronteiras
+
+class FilaFronteira : public Fronteira {
+    queue<pair<int, int>> q;
+public:
+    void push(int v, int p) override { q.push({v, p}); }
+    pair<int, int> pop() override { 
+        auto item = q.front(); 
+        q.pop(); 
+        return item; 
+    }
+    bool empty() override { return q.empty(); }
+};
+
+class PilhaFronteira : public Fronteira {
+    stack<pair<int, int>> s;
+public:
+    void push(int v, int p) override { s.push({v, p}); }
+    pair<int, int> pop() override { 
+        auto item = s.top(); 
+        s.pop(); 
+        return item; 
+    }
+    bool empty() override { return s.empty(); }
+};
+
+#pragma endregion
+
 #pragma region Métodos privados
 
-void Grafo::dfs_componentes(
-    int v,
-    vector<int>& c,
-    vector<int>& vis
-) {
-    c.push_back(v);
-    vis[v] = 1;
-
-    for (int prox : adj[v]) {
-        if (vis[prox])
-            continue;
-
-        dfs_componentes(prox, c, vis);
-    }
-}
-
-void Grafo::dfs_impl(
-    int v,
+vector<int> Grafo::traverse_impl(
+    int start,
     vector<int>& pai,
-    vector<int>& dist
+    vector<int>& dist,
+    Fronteira& f
 ) {
-    for (int prox : adj[v]) {
-        if (pai[prox])
-            continue;
+    vector<int> comp;
 
-        pai[prox] = v;
-        dist[prox] = dist[v] + 1;
+    f.push(start, start);
 
-        dfs_impl(prox, pai, dist);
+    while(!f.empty()){
+        auto [v, p] = f.pop();
+
+        // MARCAÇÃO NO POP
+        if(pai[v]) continue;
+        
+        pai[v] = p;
+        dist[v] = (v == start) ? 0 : dist[p] + 1;
+        
+        comp.push_back(v);
+
+        for(int prox : adj[v]){
+            if(!pai[prox]){
+                f.push(prox, v);
+            }
+        }
     }
-}
-
-bool Grafo::is_a_tree(
-    int v,
-    vector<int>& pai,
-    vector<int>& dist
-) {
-    if (m != n - 1)
-        return false;
-
-    bfs(v, pai, dist);
-
-    return *min_element(pai.begin() + 1, pai.end()) != 0;
+    
+    return comp;
 }
 
 #pragma endregion
@@ -69,46 +81,21 @@ Grafo::Grafo(int n_)
 
 #pragma region Métodos Getters
 
-int Grafo::get_n() const {
-    return n;
-}
-
-int Grafo::get_m() const {
-    return m;
-}
-
-int Grafo::get_grau_minimo() const {
-    return menor;
-}
-
-int Grafo::get_grau_maximo() const {
-    return maior;
-}
-
-ld Grafo::get_grau_medio() const {
-    return (n > 0) ? (ld) total / n : 0;
-}
-
-ld Grafo::get_grau_mediano() const {
-    return mediana_val;
-}
-
-const vector<vector<int>>& Grafo::get_lista_adj() const {
-    return adj;
-}
+int Grafo::get_n() const { return n; }
+int Grafo::get_m() const { return m; }
+int Grafo::get_grau_minimo() const { return menor; }
+int Grafo::get_grau_maximo() const { return maior; }
+ld Grafo::get_grau_medio() const { return (n > 0) ? (ld) total / n : 0; }
+ld Grafo::get_grau_mediano() const { return mediana_val; }
+const vector<vector<int>>& Grafo::get_lista_adj() const { return adj; }
 
 vector<vector<int>> Grafo::get_matriz_adj() const {
-    vector<vector<int>> matriz(
-        n + 1,
-        vector<int>(n + 1, 0)
-    );
-
+    vector<vector<int>> matriz(n + 1, vector<int>(n + 1, 0));
     for (int u = 1; u <= n; u++) {
         for (int v : adj[u]) {
             matriz[u][v] = 1;
         }
     }
-
     return matriz;
 }
 
@@ -126,13 +113,11 @@ void Grafo::add_edge(int u, int v) {
 
     grau[u]++;
     grau[v]++;
-
     m++;
 }
 
 void Grafo::build() {
-    if (n == 0)
-        return;
+    if (n == 0) return;
 
     menor = inf;
     maior = 0;
@@ -143,11 +128,9 @@ void Grafo::build() {
 
     for (int v = 1; v <= n; v++) {
         int d = grau[v];
-
         total += d;
         menor = min(menor, d);
         maior = max(maior, d);
-
         ord_graus.push_back(d);
     }
 
@@ -164,71 +147,41 @@ void Grafo::build() {
 
 #pragma region Algoritmos em Grafos
 
-vector<vector<int>> Grafo::get_components() {
+vector<vector<int>> Grafo::get_components(){
     vector<vector<int>> asw;
-    vector<int> vis(n + 1, 0);
+    
+    vector<int> pai(n + 1, 0);
+    vector<int> dist(n + 1, inf);
 
-    for (int v = 1; v <= n; v++) {
-        if (vis[v])
-            continue;
-
-        vector<int> comp;
-
-        dfs_componentes(v, comp, vis);
-
+    for(int v = 1; v <= n; v++){
+        if(pai[v]) continue;
+        
+        FilaFronteira fila;
+        vector<int> comp = traverse_impl(v, pai, dist, fila);
         asw.push_back(comp);
     }
 
-    sort(
-        asw.begin(),
-        asw.end(),
-        [](const vector<int>& a, const vector<int>& b) {
-            return a.size() > b.size();
-        }
-    );
+    sort(asw.begin(), asw.end(), [](const vector<int>& a, const vector<int>& b){
+        return a.size() > b.size();
+    });
 
     return asw;
 }
 
-void Grafo::dfs(
-    int start,
-    vector<int>& pai,
-    vector<int>& dist
-) {
+vector<int> Grafo::dfs(int start, vector<int>& pai, vector<int>& dist){
     pai.assign(n + 1, 0);
     dist.assign(n + 1, inf);
-
-    pai[start] = start;
-
-    dfs_impl(start, pai, dist);
+    
+    PilhaFronteira pilha;
+    return traverse_impl(start, pai, dist, pilha);
 }
 
-void Grafo::bfs(
-    int start,
-    vector<int>& pai,
-    vector<int>& dist
-) {
+vector<int> Grafo::bfs(int start, vector<int>& pai, vector<int>& dist){
     pai.assign(n + 1, 0);
     dist.assign(n + 1, inf);
-
-    queue<int> fila;
-
-    fila.push(start);
-    pai[start] = start;
-    dist[start] = 0;
-
-    while (!fila.empty()) {
-        int v = fila.front();
-        fila.pop();
-
-        for (int prox : adj[v]) {
-            if(pai[prox]) continue;
-
-            dist[prox] = dist[v] + 1;
-            pai[prox] = v;
-            fila.push(prox);
-        }
-    }
+    
+    FilaFronteira fila;
+    return traverse_impl(start, pai, dist, fila);
 }
 
 int Grafo::get_dist(int u, int v) {
@@ -239,13 +192,12 @@ int Grafo::get_dist(int u, int v) {
 
 int Grafo::get_diameter() {
     vector<int> p, d;
-
     int asw = 0;
     for(vector<int> &component: get_components()){
         bfs(component[0], p, d);
-        int best=component[0];
+        int best = component[0];
         
-        for(int v=1; v<=n; v++){
+        for(int v = 1; v <= n; v++){
             if(d[v] == inf) continue;
             if(d[best] < d[v]){
                 best = v;
@@ -254,7 +206,7 @@ int Grafo::get_diameter() {
         
         bfs(best, p, d);
         
-        for(int v=1; v<=n; v++){
+        for(int v = 1; v <= n; v++){
             if(d[v] == inf) continue;
             if(d[best] < d[v]){
                 best = v;
