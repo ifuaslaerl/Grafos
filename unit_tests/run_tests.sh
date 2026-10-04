@@ -25,7 +25,7 @@ run_task(){
     local input_dir="$CASES_DIR/$task/input"
     local expected_dir="$CASES_DIR/$task/expected"
     local binary="$BUILD_DIR/$task"
-    local input expected actual case_name
+    local input expected actual case_name input_file expected_file
 
     if [[ ! -f "$source" ]]; then
         echo "Erro: não existe main para a tarefa '$task': $source" >&2
@@ -46,11 +46,21 @@ run_task(){
     fi
 
     local found_case=0
-    for input in "$input_dir"/*.in; do
+    for input in "$input_dir"/*.in "$input_dir"/*.txt; do
         [[ -f "$input" ]] || continue
         found_case=1
-        case_name="$(basename "$input" .in)"
-        expected="$expected_dir/$case_name.ans"
+        input_file="$(basename "$input")"
+        if [[ "$input_file" == test_input*.txt ]]; then
+            expected_file="${input_file/test_input/test_output}"
+            case_name="${input_file%.txt}"
+        elif [[ "$input_file" == *.in ]]; then
+            case_name="${input_file%.in}"
+            expected_file="$case_name.ans"
+        else
+            case_name="${input_file%.txt}"
+            expected_file="$input_file"
+        fi
+        expected="$expected_dir/$expected_file"
         actual="$TMP_DIR/$task-$case_name.out"
 
         if [[ ! -f "$expected" ]]; then
@@ -73,7 +83,33 @@ run_task(){
                 echo "FALHOU $task/$case_name: saída inválida"
                 FAILED=$((FAILED + 1))
             fi
-        elif diff -u "$expected" "$actual"; then
+        elif [[ "$task" == 1671 ]] && python3 - "$expected" "$actual" <<'PY'
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as file:
+    expected_tokens = file.read().split()
+with open(sys.argv[2], encoding="utf-8") as file:
+    actual_tokens = file.read().split()
+
+if expected_tokens == actual_tokens:
+    sys.exit(0)
+
+limit = min(len(expected_tokens), len(actual_tokens))
+for index in range(limit):
+    if expected_tokens[index] != actual_tokens[index]:
+        print(
+            f"Primeira diferença no índice {index}: "
+            f"esperado={expected_tokens[index]}, obtido={actual_tokens[index]}"
+        )
+        break
+else:
+    print(
+        f"Quantidade de valores diferente: "
+        f"esperado={len(expected_tokens)}, obtido={len(actual_tokens)}"
+    )
+sys.exit(1)
+PY
+        then
             echo "OK $task/$case_name"
         else
             echo "FALHOU $task/$case_name: saída diferente"

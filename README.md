@@ -1,106 +1,159 @@
-# 📊 Analisador e Visualizador de Grafos
+# Biblioteca e ferramentas para grafos
 
-Esta ferramenta é um pipeline completo para carregamento, processamento, benchmarking e visualização de grafos. O sistema é dividido em duas partes: um núcleo de alta performance escrito em **C++17** (responsável por medir tempo, memória e exportar as estruturas do grafo) e um módulo de visualização em **Python** (responsável por gerar gráficos e desenhar as árvores de travessia).
+Repositório de uma biblioteca C++17 para grafos e ferramentas para coleta de
+métricas, exportação de estruturas, análise e testes de problemas do CSES.
 
-## Pré-requisitos
+## Requisitos
 
-Para compilar e executar o projeto, você precisará de:
+- GCC/G++ com suporte a C++17
+- GNU Make
+- Python 3.8 ou superior para executar a análise e os validadores dos testes
+- Dependências Python dos gráficos:
 
-* **Compilador C++**: GCC/G++ com suporte a C++17 (ambiente Linux/Unix recomendado para medição precisa de memória `getrusage`).
-* **Make**: Utilitário para automação de compilação.
-* **Python 3.8+**: Com as seguintes bibliotecas instaladas:
 ```bash
-pip install pandas matplotlib seaborn networkx numpy
-
+python3 -m pip install pandas matplotlib seaborn networkx numpy
 ```
 
+## Compilar
 
-
-## 1. Compilando o Projeto (C++)
-
-O projeto utiliza um `makefile` para gerenciar a compilação. Para construir os executáveis, abra o terminal na raiz do projeto e execute:
+Na raiz do repositório:
 
 ```bash
 make
-
 ```
 
-Isso compilará os arquivos da pasta `Exporters/` combinados com o núcleo `src/` e gerará três executáveis na raiz do diretório:
+Isso compila os exportadores `export_json`, `export_grafo` e `export_graus`.
+Para compilar também o programa interativo de teste do grafo ponderado:
 
-1. `export_json`
-2. `export_grafo`
-3. `export_graus`
+```bash
+make test_graph
+```
 
-*(Para limpar os arquivos compilados e os executáveis, utilize `make clean`).*
+Para remover binários, objetos e artefatos gerados (JSON, CSV e PNG):
 
-## 2. Estrutura dos Arquivos de Entrada
+```bash
+make clean
+```
 
-Os arquivos de texto dentro da pasta `Entrada/` devem conter a quantidade de vértices na primeira linha, seguida por uma lista de arestas (pares de vértices `u` e `v`), por exemplo:
+O `clean` preserva grafos de entrada e casos de teste.
+
+## Biblioteca C++
+
+A biblioteca está em `src/graph.hpp`, com implementações template em
+`src/graph_general.tpp` e `src/graph_algorithms.tpp`. O tipo dos pesos é
+escolhido ao instanciar o grafo, por exemplo:
+
+```cpp
+Grafo<long double> graph(n);
+graph.add_edge(u, v, peso); // aresta não direcionada
+graph.add_arc(u, v, peso);  // arco direcionado
+```
+
+Os algoritmos disponíveis incluem BFS, DFS iterativa e recursiva, Dijkstra com
+vetor ou heap, componentes conexas, distância e diâmetro. BFS e DFS iterativa
+percorrem arestas sem peso; Dijkstra calcula distâncias ponderadas e pressupõe
+pesos não negativos.
+
+### Programa para testes manuais
+
+`make test_graph` gera `./test_graph`. Ele lê `n` na primeira linha e, em cada
+linha seguinte, `u v peso`. O vértice inicial é opcional e vale `1` por padrão:
+
+```bash
+./test_graph 1 < grafo_ponderado.txt
+```
+
+O programa imprime em CSV pais e distâncias de BFS, DFS recursiva e das duas
+implementações de Dijkstra.
+
+## Exportadores da Parte 1
+
+Os exportadores atuais leem grafos **não ponderados**: a primeira linha contém
+`n`, seguida por linhas `u v`. São arestas não direcionadas, com vértices de
+`1` a `n`.
+
+Exemplo:
 
 ```text
 5
 1 2
-2 3
-3 4
+2 5
+5 3
 4 5
-
+1 5
 ```
 
-## 3. Como Utilizar (Pipeline)
-
-O pipeline de execução funciona com o padrão de redirecionamento de I/O do terminal. Você deve passar o arquivo de texto como entrada (`<`) e redirecionar a saída (`>`) para as pastas corretas dentro do diretório `Dados/`.
-
-### Passo A: Exportar as Métricas e Estruturas
-
-Execute os comandos abaixo para cada grafo que você deseja analisar. Altere os nomes dos arquivos conforme necessário.
-
-**Gerar a telemetria e o benchmark (JSON):**
+Os grafos podem ser colocados localmente em `Dados/Entrada/` (a pasta é
+ignorada pelo Git por conter arquivos grandes). Exemplo para o grafo 1:
 
 ```bash
-./export_json < Entrada/grafo_1.txt > Dados/JSON/grafo_1.json
-
+mkdir -p Dados/JSON Dados/Grafos Dados/Graus
+./export_json < Dados/Entrada/grafo_1.txt > Dados/JSON/grafo_1.json
+./export_grafo bfs < Dados/Entrada/grafo_1.txt > Dados/Grafos/bfs_1.csv
+./export_grafo dfs < Dados/Entrada/grafo_1.txt > Dados/Grafos/dfs_1.csv
+./export_graus < Dados/Entrada/grafo_1.txt > Dados/Graus/grafo_1.csv
 ```
 
-**Gerar a árvore geradora da BFS (CSV):**
+O número identificador nos nomes dos arquivos deve coincidir. O JSON contém
+métricas, telemetria e benchmarks; os CSVs armazenam dados por vértice ou
+distribuições extensas, como árvores de busca e frequências de grau.
+
+## Gerar gráficos
+
+Depois de gerar os arquivos JSON e CSV para os grafos que serão analisados:
 
 ```bash
-./export_grafo bfs < Entrada/grafo_1.txt > Dados/Grafos/bfs_1.csv
-
+python3 Analysers/main.py
 ```
 
-**Gerar a árvore geradora da DFS (CSV):**
+O analisador procura os dados em `Dados/JSON/`, `Dados/Grafos/` e
+`Dados/Graus/`, e grava os gráficos em `Dados/Graficos/`. São produzidos
+gráficos de desempenho e memória, perfil de tempo, histogramas de grau,
+árvores BFS/DFS e sobreposição das árvores.
+
+## Testes CSES
+
+Os adaptadores para as tarefas CSES estão em `unit_tests/mains/<id>/main.cpp`:
+
+- **1667 — Message Route:** BFS para obter uma rota com número mínimo de
+  computadores.
+- **1669 — Round Trip:** DFS e reconstrução de um ciclo.
+- **1671 — Shortest Routes I:** Dijkstra com heap em grafo direcionado,
+  representado usando `add_arc()`.
+
+Coloque cada entrada e seu gabarito nos diretórios ignorados pelo Git:
+
+```text
+unit_tests/cases/<id>/input/
+unit_tests/cases/<id>/expected/
+```
+
+O runner associa arquivos com nomes-base correspondentes. Para arquivos
+oficiais nomeados `test_input...txt` e `test_output...txt`, o script associa
+automaticamente os pares. Para outros nomes, use `.in` para a entrada e a
+mesma base com `.ans` para o gabarito.
+
+Execute todos os problemas configurados:
 
 ```bash
-./export_grafo dfs < Entrada/grafo_1.txt > Dados/Grafos/dfs_1.csv
-
+./unit_tests/run_tests.sh
 ```
 
-**Gerar a distribuição de graus (CSV):**
+Execute apenas um:
 
 ```bash
-./export_graus < Entrada/grafo_1.txt > Dados/Graus/grafo_1.csv
-
+./unit_tests/run_tests.sh 1671
 ```
 
-> **Aviso de Nomenclatura:** É fundamental que os números nos nomes dos arquivos gerados sejam coincidentes (ex: `grafo_1.json`, `bfs_1.csv`, `dfs_1.csv`, `grafo_1.csv`). O script em Python utiliza esse número para cruzar os dados.
+O problema 1671 compara os valores de saída com o gabarito, ignorando
+diferenças de espaços em branco. Como 1667 e 1669 aceitam qualquer caminho
+válido, validadores verificam a validade da rota/ciclo, a minimalidade da rota
+no 1667 e se existe solução conforme indicado pelo primeiro token do gabarito.
+Os binários temporários de teste são gravados em `unit_tests/.build/`.
 
-### Passo B: Gerar as Visualizações (Python)
+## Arquivos gerados e Git
 
-Após preencher as pastas `JSON/`, `Grafos/` e `Graus/` dentro do diretório `Dados/`, basta rodar o módulo analisador. Na raiz do projeto, execute:
-
-```bash
-python Analysers/main.py
-
-```
-
-O script lerá todos os dados exportados automaticamente e salvará os artefatos visuais no diretório `Dados/Graficos/`.
-
-## 4. O Que Será Gerado?
-
-Após a execução do script Python, a pasta `Dados/Graficos/` conterá:
-
-* **Curvas de Performance (Linear e Log):** Comparação do tempo médio de execução entre BFS, DFS Iterativa e DFS Recursiva em relação ao tamanho do grafo (V + E).
-* **Curvas de Memória:** Gráfico ilustrando o consumo máximo de RAM (em MB) alocado durante a execução dos algoritmos em C++.
-* **Time Profiling:** Gráfico de barras empilhadas mostrando o tempo gasto lendo o arquivo (I/O), calculando graus, extraindo componentes e rodando a travessia.
-* **Topologias de Árvore (PNG):** Desenhos estéticos mostrando o esqueleto de navegação gerado pela BFS e pela DFS.
-* **Histogramas de Grau:** Gráficos de barras apresentando a frequência absoluta de graus dos vértices de cada grafo.
+O `.gitignore` exclui os grafos grandes de `Dados/Entrada/`, as saídas em
+`Dados/JSON/`, `Dados/Grafos/`, `Dados/Graus/` e `Dados/Graficos/`, assim como
+os arquivos de entrada e gabarito de `unit_tests/cases/`. Os adaptadores,
+validadores e scripts de teste continuam versionados.
