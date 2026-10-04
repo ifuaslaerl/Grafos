@@ -36,7 +36,6 @@
 
 # Executables
 *.exe
-*.out
 *.app
 
 # Build directories
@@ -68,8 +67,30 @@ vcpkg_installed/
 Testing/
 .cache/
 
-Dados/
-Entrada/
-Saida/
+# Large input graphs and generated data/analyser output.
+/Dados/Entrada/
+/Dados/JSON/
+/Dados/Grafos/
+/Dados/Graus/
+/Dados/Graficos/
 
-*/__pycache__/
+# Local task inputs and expected/golden outputs.
+/unit_tests/cases/*/input/
+/unit_tests/cases/*/expected/
+/Entradas/
+/Saidas/
+
+# Course PDFs and local report files are kept outside version control.
+Docs/
+
+__pycache__/
+*.py[cod]
+
+# Unit test build products
+/unit_tests/.build/
+
+# Project executables
+/export_json
+/export_grafo
+/export_graus
+/test_graph

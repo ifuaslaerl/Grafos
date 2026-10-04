@@ -1,66 +1,62 @@
 #ifndef GRAFO_HPP
 #define GRAFO_HPP
 
+#include <limits>
 #include <vector>
-#include <utility>
 
 using namespace std;
 
-typedef long double ld;
-typedef long long ll;
+namespace graph_lib{
+template <typename T>
+class IFronteira;
+}
 
-// Fronteira carrega o par: (Vértice Atual, Pai que o descobriu)
-class Fronteira {
-public:
-    virtual void push(int v, int p) = 0;
-    virtual pair<int, int> pop() = 0;
-    virtual bool empty() = 0;
-    virtual ~Fronteira() = default;
+template <typename T>
+struct Edge{
+    int u, v;
+    T w;
 };
 
-class Grafo {
+template <typename T>
+class Grafo{
 private:
-    int n, m;
-    int menor, maior, total;
-    ld mediana_val;
+    int n, m, menor, maior, total;
+    long double mediana_val;
 
     vector<int> grau;
-    vector<vector<int>> adj;
+    vector<vector<Edge<T>>> adj;
 
     vector<int> traverse_impl(
         int start,
         vector<int>& pai,
-        vector<int>& dist,
-        Fronteira& fronteira
+        vector<T>& dist,
+        graph_lib::IFronteira<T>& fronteira
     );
 
-    void dfs_recursiva_util(int u, int pai, int dist_atual, std::vector<int>& p, std::vector<int>& d, std::vector<bool>& vis, std::vector<int>& ordem);
+    void dfs_recursiva_util(
+        int u,
+        int pai,
+        vector<int>& p,
+        vector<T>& dist,
+        vector<int>& ordem
+    );
 
 public:
-    Grafo(int n_);
-
-    #pragma region Métodos Getters
+    explicit Grafo(int n_);
 
     int get_n() const;
     int get_m() const;
     int get_grau_minimo() const;
     int get_grau_maximo() const;
-    ld get_grau_medio() const;
-    ld get_grau_mediano() const;
+    long double get_grau_medio() const;
+    long double get_grau_mediano() const;
 
-    const vector<vector<int>>& get_lista_adj() const;
+    const vector<vector<Edge<T>>>& get_lista_adj() const;
     vector<vector<int>> get_matriz_adj() const;
 
-    #pragma endregion
-
-    #pragma region Construção do Grafo
-
-    void add_edge(int u, int v);
+    void add_edge(int u, int v, T w = T{1});
+    void add_arc(int u, int v, T w);
     void build();
-
-    #pragma endregion
-
-    #pragma region Algoritmos em Grafos
 
     vector<vector<int>> get_components();
 
@@ -70,18 +66,35 @@ public:
         vector<int>& dist
     );
 
-    vector<int> dfs_recursiva(int start, std::vector<int>& p, std::vector<int>& d);
-    
+    vector<int> dfs_recursiva(
+        int start,
+        vector<int>& pai,
+        vector<T>& dist
+    );
+
     vector<int> bfs(
         int start,
         vector<int>& pai,
         vector<int>& dist
     );
 
-    int get_dist(int u, int v);
-    int get_diameter();
+    vector<int> dijkstra_vector(
+        int start,
+        vector<int>& pai,
+        vector<T>& dist
+    );
 
-    #pragma endregion
+    vector<int> dijkstra_heap(
+        int start,
+        vector<int>& pai,
+        vector<T>& dist
+    );
+
+    T get_dist(int u, int v, graph_lib::IFronteira<T>& fronteira);
+    int get_diameter();
 };
 
-#endif // GRAFO_HPP
+#include "graph_general.tpp"
+#include "graph_algorithms.tpp"
+
+#endif
