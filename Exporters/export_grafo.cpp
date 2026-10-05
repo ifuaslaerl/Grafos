@@ -29,6 +29,7 @@ int main(int argc, char* argv[]){
     vector<int> final_p(n + 1, 0);
     vector<int> final_d(n + 1, -1);
     vector<int> final_ordem(n + 1, -1);
+    vector<int> final_componente(n + 1, 0);
     int ordem_global = 1;
 
     if(n > 0){
@@ -36,7 +37,8 @@ int main(int argc, char* argv[]){
         vector<vector<int>> comps = G.get_components();
         
         // Itera sobre cada componente desconexo
-        for(const auto& comp : comps){
+        for(size_t i = 0; i < comps.size(); ++i){
+            const auto& comp = comps[i];
             if(comp.empty()) continue;
             
             int start_node = comp[0]; // Pega um vértice arbitrário do componente
@@ -55,18 +57,20 @@ int main(int argc, char* argv[]){
                 final_p[vertice] = p[vertice];
                 final_d[vertice] = d[vertice];
                 final_ordem[vertice] = ordem_global++;
+                final_componente[vertice] = static_cast<int>(i) + 1;
             }
         }
 
         // Exportação do CSV
-        cout << "vertice,pai,distancia,ordem_visitacao\n";
+        cout << "vertice,pai,distancia,ordem_visitacao,componente_conexa\n";
         
         for(int i = 1; i <= n; i++){
             // Se o vértice isolado for a própria raiz, garantimos que o pai seja 0 (ou ele mesmo)
             cout << i << "," 
                  << final_p[i] << "," 
                  << final_d[i] << "," 
-                 << final_ordem[i] << "\n";
+                 << final_ordem[i] << ","
+                 << final_componente[i] << "\n";
         }
     }
 

@@ -97,6 +97,8 @@ mkdir -p Dados/JSON Dados/Grafos Dados/Graus
 O número identificador nos nomes dos arquivos deve coincidir. O JSON contém
 métricas, telemetria e benchmarks; os CSVs armazenam dados por vértice ou
 distribuições extensas, como árvores de busca e frequências de grau.
+O CSV de `export_grafo` inclui `componente_conexa`, com identificadores
+iniciando em 1 e atribuídos pela ordem decrescente do tamanho das componentes.
 
 ## Gerar gráficos
 
