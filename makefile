@@ -5,7 +5,7 @@ CXXFLAGS = -std=c++17 -O3 -march=native -flto -Wall -Wextra -I.
 LDFLAGS = -flto
 
 # Executáveis alvo
-TARGETS = export_json export_grafo export_graus
+TARGETS = export_json export_grafo export_graus export_memoria
 UNIT_TEST_BUILD_DIR = unit_tests/.build
 JSON_OUTPUTS = Dados/JSON/*.json
 CSV_OUTPUTS = Dados/Grafos/*.csv Dados/Graus/*.csv
@@ -26,6 +26,9 @@ export_grafo: Exporters/export_grafo.o
 	$(CXX) $(LDFLAGS) -o $@ $^
 
 export_graus: Exporters/export_graus.o
+	$(CXX) $(LDFLAGS) -o $@ $^
+
+export_memoria: Exporters/export_memoria.o
 	$(CXX) $(LDFLAGS) -o $@ $^
 
 # Regra genérica para transformar .cpp em .o respeitando as pastas

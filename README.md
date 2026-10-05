@@ -22,7 +22,8 @@ Na raiz do repositório:
 make
 ```
 
-Isso compila os exportadores `export_json`, `export_grafo` e `export_graus`.
+Isso compila os exportadores `export_json`, `export_grafo`, `export_graus` e
+`export_memoria`.
 Para compilar também o programa interativo de teste do grafo ponderado:
 
 ```bash
@@ -91,6 +92,7 @@ mkdir -p Dados/JSON Dados/Grafos Dados/Graus
 ./export_json < Dados/Entrada/grafo_1.txt > Dados/JSON/grafo_1.json
 ./export_grafo bfs < Dados/Entrada/grafo_1.txt > Dados/Grafos/bfs_1.csv
 ./export_grafo dfs < Dados/Entrada/grafo_1.txt > Dados/Grafos/dfs_1.csv
+./export_grafo bfs 1 < Dados/Entrada/grafo_1.txt > Dados/Grafos/bfs_1_inicio_1.csv
 ./export_graus < Dados/Entrada/grafo_1.txt > Dados/Graus/grafo_1.csv
 ```
 
@@ -99,6 +101,32 @@ métricas, telemetria e benchmarks; os CSVs armazenam dados por vértice ou
 distribuições extensas, como árvores de busca e frequências de grau.
 O CSV de `export_grafo` inclui `componente_conexa`, com identificadores
 iniciando em 1 e atribuídos pela ordem decrescente do tamanho das componentes.
+Sem um vértice inicial, `export_grafo` percorre cada componente a partir de um
+vértice arbitrário, como antes. Com o argumento opcional `vertice_inicial`
+(após `bfs` ou `dfs`), executa uma única busca a partir desse vértice. Os
+vértices fora da árvore resultante permanecem no CSV com `pai=0`,
+`distancia=-1` e `ordem_visitacao=-1`; a coluna de componente continua
+preenchida para todos os vértices.
+
+### Comparar memória das representações
+
+O `export_memoria` mede o RSS atual do processo em MiB, logo após carregar o
+grafo na representação selecionada e antes de executar algoritmos. Cada
+invocação constrói somente uma representação; execute ambas com o mesmo
+arquivo para comparar:
+
+```bash
+./export_memoria lista < Dados/Entrada/grafo_1.txt
+./export_memoria matriz < Dados/Entrada/grafo_1.txt
+```
+
+Ambas as execuções imprimem um CSV com representação, número de vértices,
+número de arestas e `memoria_rss_mb`. A medição usa `VmRSS` de
+`/proc/self/status` (Linux), inclui a memória-base do processo e seus
+metadados, e não é o pico acumulado registrado no JSON. A lista armazena
+arestas como `Edge<long double>` nas duas direções; a matriz armazena inteiros
+por célula e marca ambas as direções. A comparação é da memória residente total
+do processo naquele ponto.
 
 ## Gerar gráficos
 

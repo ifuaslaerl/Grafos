@@ -93,4 +93,5 @@ __pycache__/
 /export_json
 /export_grafo
 /export_graus
+/export_memoria
 /test_graph

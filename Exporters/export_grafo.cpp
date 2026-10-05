@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <charconv>
 #include "../src/graph.hpp"
 using namespace std;
 
@@ -16,8 +17,27 @@ int main(int argc, char* argv[]){
         else if(arg == "bfs" || arg == "BFS") modo = "bfs";
     }
 
+    int origem = 0;
+    const bool origem_informada = argc > 2;
+    if(argc > 3){
+        cerr << "Uso: export_grafo [bfs|dfs] [vertice_inicial]\n";
+        return 1;
+    }
+    if(origem_informada){
+        const string arg = argv[2];
+        const auto resultado = from_chars(arg.data(), arg.data() + arg.size(), origem);
+        if(resultado.ec != errc{} || resultado.ptr != arg.data() + arg.size()){
+            cerr << "Vertice inicial invalido: " << arg << "\n";
+            return 1;
+        }
+    }
+
     int n;
     if(!(cin >> n)) return 0;
+    if(origem_informada && (origem < 1 || origem > n)){
+        cerr << "Vertice inicial deve estar entre 1 e " << n << ".\n";
+        return 1;
+    }
 
     Grafo<long double> G(n);
     int u, v;
@@ -25,7 +45,7 @@ int main(int argc, char* argv[]){
         G.add_edge(u, v);
     }
     
-    // Vetores globais para fundir os dados de múltiplos componentes
+    // Vetores globais para exportar os dados da busca.
     vector<int> final_p(n + 1, 0);
     vector<int> final_d(n + 1, -1);
     vector<int> final_ordem(n + 1, -1);
@@ -33,31 +53,37 @@ int main(int argc, char* argv[]){
     int ordem_global = 1;
 
     if(n > 0){
-        // Captura todos os componentes do grafo
         vector<vector<int>> comps = G.get_components();
-        
-        // Itera sobre cada componente desconexo
         for(size_t i = 0; i < comps.size(); ++i){
             const auto& comp = comps[i];
-            if(comp.empty()) continue;
-            
-            int start_node = comp[0]; // Pega um vértice arbitrário do componente
+            for(int vertice : comp){
+                final_componente[vertice] = static_cast<int>(i) + 1;
+            }
+        }
+
+        auto registrar_busca = [&](int start_node){
             vector<int> p, d;
             vector<int> ordem_visita_list;
-            
-            // Executa o algoritmo escolhido pelo terminal para o componente atual
             if(modo == "bfs"){
                 ordem_visita_list = G.bfs(start_node, p, d);
             } else{
                 ordem_visita_list = G.dfs(start_node, p, d);
             }
-            
-            // Salva os dados do componente nos vetores globais
+
             for(int vertice : ordem_visita_list){
                 final_p[vertice] = p[vertice];
                 final_d[vertice] = d[vertice];
                 final_ordem[vertice] = ordem_global++;
-                final_componente[vertice] = static_cast<int>(i) + 1;
+            }
+        };
+
+        if(origem_informada){
+            registrar_busca(origem);
+        } else{
+            for(const auto& comp : comps){
+                if(!comp.empty()){
+                    registrar_busca(comp[0]);
+                }
             }
         }
 
