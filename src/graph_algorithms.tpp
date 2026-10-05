@@ -407,25 +407,31 @@ vector<int> Grafo<T>::dijkstra_heap(
 template <typename T>
 void Grafo<T>::dfs_recursiva_util(
     int vertex,
-    int parent,
+    int,
     vector<int>& parents,
     vector<T>& distance,
     vector<int>& order
 ){
-    parents[vertex] = parent;
+    vector<pair<int, size_t>> stack;
+    stack.reserve(n);
+    stack.push_back({vertex, 0});
+    parents[vertex] = vertex;
     order.push_back(vertex);
 
-    for(const Edge<T>& edge : adj[vertex]){
+    while(!stack.empty()){
+        int current = stack.back().first;
+        size_t& next_edge = stack.back().second;
+        if(next_edge == adj[current].size()){
+            stack.pop_back();
+            continue;
+        }
+
+        const Edge<T>& edge = adj[current][next_edge++];
         if(parents[edge.v] == 0){
-            parents[edge.v] = vertex;
-            distance[edge.v] = distance[vertex] + edge.w;
-            dfs_recursiva_util(
-                edge.v,
-                vertex,
-                parents,
-                distance,
-                order
-            );
+            parents[edge.v] = current;
+            distance[edge.v] = distance[current] + edge.w;
+            order.push_back(edge.v);
+            stack.push_back({edge.v, 0});
         }
     }
 }

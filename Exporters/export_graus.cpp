@@ -11,7 +11,7 @@ int main(){
     int n;
     if(!(cin >> n)) return 0;
 
-    Grafo<long double> G(n);
+    Grafo<int> G(n);
     int u, v;
     while(cin >> u >> v){
         G.add_edge(u, v);

@@ -68,10 +68,15 @@ def plot_performance_curve(data_list, scale="linear"):
 def plot_memory_curve(data_list, scale="linear"):
     if not data_list or "telemetria" not in data_list[0]: return
     v_plus_e = [d["v_plus_e"] for d in data_list]
-    mem = [d["telemetria"]["peak_memory_mb"] for d in data_list]
+    mem = [
+        d["telemetria"]["memoria_get_components_delta_mb"]
+        for d in data_list
+    ]
+    if scale == "log":
+        mem = [value if value > 0 else np.nan for value in mem]
 
     plt.figure(figsize=(12, 7))
-    plt.plot(v_plus_e, mem, color="#ffcc00", marker='D', linestyle='-', linewidth=2, label="Consumo Global do Processo")
+    plt.plot(v_plus_e, mem, color="#ffcc00", marker='D', linestyle='-', linewidth=2, label="Variação de RSS em get_components")
     plt.fill_between(v_plus_e, mem, color="#ffcc00", alpha=0.1)
 
     suffix, xlabel_suf, ylabel_suf = "_linear", "", ""
@@ -81,7 +86,7 @@ def plot_memory_curve(data_list, scale="linear"):
         suffix, xlabel_suf, ylabel_suf = "_log", " [Escala Log]", " [Escala Log]"
 
     plt.xlabel(f"Quantidade de Vértices + Arestas (V + E){xlabel_suf}", fontsize=12, color="lightgray")
-    plt.ylabel(f"Pico de Memória RAM (MB){ylabel_suf}", fontsize=12, color="lightgray")
+    plt.ylabel(f"Variação de RSS em get_components (MB){ylabel_suf}", fontsize=12, color="lightgray")
     plt.legend(facecolor="#222222", edgecolor="white", labelcolor="white")
     plt.tight_layout()
     plt.savefig(os.path.join(OUTPUT_DIR, f"02_memory_curve{suffix}.png"), dpi=300)

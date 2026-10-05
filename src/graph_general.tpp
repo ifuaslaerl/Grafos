@@ -55,6 +55,19 @@ const vector<vector<Edge<T>>>& Grafo<T>::get_lista_adj() const{
 }
 
 template <typename T>
+void Grafo<T>::reserve_adjacencia(const vector<int>& capacidades){
+    if(capacidades.size() != adj.size()){
+        throw invalid_argument("Capacidades devem ter tamanho n + 1.");
+    }
+    for(size_t vertex = 0; vertex < adj.size(); ++vertex){
+        if(capacidades[vertex] < 0){
+            throw invalid_argument("Capacidade de adjacencia nao pode ser negativa.");
+        }
+        adj[vertex].reserve(static_cast<size_t>(capacidades[vertex]));
+    }
+}
+
+template <typename T>
 vector<vector<int>> Grafo<T>::get_matriz_adj() const{
     vector<vector<int>> matriz(n + 1, vector<int>(n + 1, 0));
     for(int u = 1; u <= n; ++u){

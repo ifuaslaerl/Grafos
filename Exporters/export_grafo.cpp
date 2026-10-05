@@ -39,7 +39,7 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
-    Grafo<long double> G(n);
+    Grafo<int> G(n);
     int u, v;
     while(cin >> u >> v){
         G.add_edge(u, v);

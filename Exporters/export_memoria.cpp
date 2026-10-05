@@ -75,7 +75,7 @@ int main(int argc, char* argv[]){
     };
 
     if(representacao == "lista"){
-        vector<vector<Edge<long double>>> adj(n + 1);
+        vector<vector<Edge<int>>> adj(n + 1);
         if(!ler_arestas([&](int u, int v){
             adj[u].push_back({u, v, 1});
             adj[v].push_back({v, u, 1});

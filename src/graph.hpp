@@ -2,6 +2,7 @@
 #define GRAFO_HPP
 
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
 using namespace std;
@@ -54,6 +55,7 @@ public:
     const vector<vector<Edge<T>>>& get_lista_adj() const;
     vector<vector<int>> get_matriz_adj() const;
 
+    void reserve_adjacencia(const vector<int>& capacidades);
     void add_edge(int u, int v, T w = T{1});
     void add_arc(int u, int v, T w);
     void build();

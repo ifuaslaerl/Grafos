@@ -108,6 +108,27 @@ vértices fora da árvore resultante permanecem no CSV com `pai=0`,
 `distancia=-1` e `ordem_visitacao=-1`; a coluna de componente continua
 preenchida para todos os vértices.
 
+Por padrão, `export_json` executa o benchmark completo: mede a construção do
+grafo, chama `get_components()` e exporta quantidade, menor e maior tamanho,
+além dos tamanhos de todas as componentes em ordem decrescente. A telemetria
+inclui os tempos de construção e de `get_components()` e a variação do RSS
+durante essa chamada. Também mede BFS, DFS iterativa e DFS recursiva usando somente a
+lista de adjacência.
+
+O benchmark usa até 100 vértices iniciais distintos,
+selecionados aleatoriamente com semente fixa, e mede BFS, DFS iterativa e DFS
+recursiva para cada origem. Se o grafo tiver menos de 100 vértices, usa todos
+eles. Os dados ficam em `benchmark.representacoes.lista`; as chaves históricas `BFS`,
+`DFS_Iterativa` e `DFS_Recursiva` continuam representando os tempos da lista.
+O total de origens executadas é registrado em
+`benchmark.numero_execucoes`. O exporter não constrói nem testa a matriz de
+adjacência. Para `get_components()`, a telemetria registra o RSS imediatamente
+antes e depois da chamada e a diferença entre esses valores em
+`memoria_get_components_delta_mb`; essa diferença é específica à etapa, não o
+pico transitório de alocações internas. No `export_json`, o peso não usado é
+armazenado como `int`, e a capacidade das listas de adjacência é reservada após
+contar os graus, reduzindo o uso de memória em grafos grandes.
+
 ### Comparar memória das representações
 
 O `export_memoria` mede o RSS atual do processo em MiB, logo após carregar o
@@ -124,7 +145,7 @@ Ambas as execuções imprimem um CSV com representação, número de vértices,
 número de arestas e `memoria_rss_mb`. A medição usa `VmRSS` de
 `/proc/self/status` (Linux), inclui a memória-base do processo e seus
 metadados, e não é o pico acumulado registrado no JSON. A lista armazena
-arestas como `Edge<long double>` nas duas direções; a matriz armazena inteiros
+arestas como `Edge<int>` nas duas direções; a matriz armazena inteiros
 por célula e marca ambas as direções. A comparação é da memória residente total
 do processo naquele ponto.
 
