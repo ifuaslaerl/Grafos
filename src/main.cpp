@@ -78,9 +78,8 @@ int main(int argc, char* argv[]){
     vector<int> bfs_parent, bfs_level;
     graph.bfs(start, bfs_parent, bfs_level);
 
-    vector<int> dfs_parent;
-    vector<long double> dfs_distance;
-    graph.dfs_recursiva(start, dfs_parent, dfs_distance);
+    vector<int> dfs_parent, dfs_distance;
+    graph.dfs(start, dfs_parent, dfs_distance);
 
     vector<int> vector_parent, heap_parent;
     vector<long double> vector_distance, heap_distance;
@@ -89,7 +88,7 @@ int main(int argc, char* argv[]){
     graph.dijkstra_heap(start, heap_parent, heap_distance);
 
     cout << setprecision(12);
-    cout << "vertice,bfs_pai,bfs_nivel,dfs_pai,dfs_nivel,"
+    cout << "vertice,bfs_pai,bfs_nivel,dfs_iterativa_pai,dfs_iterativa_nivel,"
                  "dijkstra_vetor_pai,dijkstra_vetor_dist,"
                  "dijkstra_heap_pai,dijkstra_heap_dist\n";
     for(int vertex = 1; vertex <= n; ++vertex){

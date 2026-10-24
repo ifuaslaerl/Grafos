@@ -31,15 +31,8 @@ private:
         int start,
         vector<int>& pai,
         vector<T>& dist,
-        graph_lib::IFronteira<T>& fronteira
-    );
-
-    void dfs_recursiva_util(
-        int u,
-        int pai,
-        vector<int>& p,
-        vector<T>& dist,
-        vector<int>& ordem
+        graph_lib::IFronteira<T>& fronteira,
+        int& undirected_edge_count
     );
 
 public:
@@ -60,18 +53,16 @@ public:
     void add_arc(int u, int v, T w);
     void build();
 
-    vector<vector<int>> get_components();
+    void get_components(
+        vector<vector<int>>& components,
+        vector<int>& component_edge_counts,
+        graph_lib::IFronteira<T>& frontier
+    );
 
     vector<int> dfs(
         int start,
         vector<int>& pai,
         vector<int>& dist
-    );
-
-    vector<int> dfs_recursiva(
-        int start,
-        vector<int>& pai,
-        vector<T>& dist
     );
 
     vector<int> bfs(

@@ -11,7 +11,7 @@ métricas, exportação de estruturas, análise e testes de problemas do CSES.
 - Dependências Python dos gráficos:
 
 ```bash
-python3 -m pip install pandas matplotlib seaborn networkx numpy
+python3 -m pip install -r requirements.txt
 ```
 
 ## Compilar
@@ -64,14 +64,15 @@ linha seguinte, `u v peso`. O vértice inicial é opcional e vale `1` por padrã
 ./test_graph 1 < grafo_ponderado.txt
 ```
 
-O programa imprime em CSV pais e distâncias de BFS, DFS recursiva e das duas
+O programa imprime em CSV pais e distâncias de BFS, DFS iterativa e das duas
 implementações de Dijkstra.
 
-## Exportadores da Parte 1
+## Exportadores e grafos ponderados
 
-Os exportadores atuais leem grafos **não ponderados**: a primeira linha contém
-`n`, seguida por linhas `u v`. São arestas não direcionadas, com vértices de
-`1` a `n`.
+Os exportadores leem grafos não direcionados. Para grafos não ponderados, a
+primeira linha contém `n`, seguida por linhas `u v`. Para grafos ponderados, as
+arestas têm o formato `u v peso`; use `--weighted` nos exportadores para indicar
+esse formato.
 
 Exemplo:
 
@@ -96,38 +97,53 @@ mkdir -p Dados/JSON Dados/Grafos Dados/Graus
 ./export_graus < Dados/Entrada/grafo_1.txt > Dados/Graus/grafo_1.csv
 ```
 
+Para uma entrada ponderada:
+
+```bash
+./export_json --weighted < Dados/Entrada/grafo_W_3.txt > Dados/JSON/grafo_W_3.json
+./export_grafo bfs --weighted < Dados/Entrada/grafo_W_3.txt > Dados/Grafos/bfs_W_3.csv
+./export_grafo dfs --weighted < Dados/Entrada/grafo_W_3.txt > Dados/Grafos/dfs_W_3.csv
+./export_grafo dijkstra --weighted < Dados/Entrada/grafo_W_3.txt > Dados/Grafos/dijkstra_W_3.csv
+./export_graus --weighted < Dados/Entrada/grafo_W_3.txt > Dados/Graus/grafo_W_3.csv
+```
+
+`export_json` mede `get_components()` usando BFS, DFS iterativa e Dijkstra com
+heap, para grafos ponderados e não ponderados. Os pesos devem ser finitos e
+não negativos. `export_grafo dijkstra` gera a árvore de caminhos mínimos; sem
+origem explícita, BFS, DFS e
+Dijkstra usam a primeira raiz de cada componente, na mesma ordem. Também é
+possível informar uma origem, por exemplo `./export_grafo dijkstra --weighted 1`.
+
 O número identificador nos nomes dos arquivos deve coincidir. O JSON contém
 métricas, telemetria e benchmarks; os CSVs armazenam dados por vértice ou
 distribuições extensas, como árvores de busca e frequências de grau.
 O CSV de `export_grafo` inclui `componente_conexa`, com identificadores
 iniciando em 1 e atribuídos pela ordem decrescente do tamanho das componentes.
-Sem um vértice inicial, `export_grafo` percorre cada componente a partir de um
-vértice arbitrário, como antes. Com o argumento opcional `vertice_inicial`
-(após `bfs` ou `dfs`), executa uma única busca a partir desse vértice. Os
+Sem um vértice inicial, `export_grafo` percorre cada componente. Com o argumento
+opcional `vertice_inicial`, executa uma única busca a partir desse vértice. Os
 vértices fora da árvore resultante permanecem no CSV com `pai=0`,
 `distancia=-1` e `ordem_visitacao=-1`; a coluna de componente continua
 preenchida para todos os vértices.
 
 Por padrão, `export_json` executa o benchmark completo: mede a construção do
-grafo, chama `get_components()` e exporta quantidade, menor e maior tamanho,
-além dos tamanhos de todas as componentes em ordem decrescente. A telemetria
-inclui os tempos de construção e de `get_components()` e a variação do RSS
-durante essa chamada. Também mede BFS, DFS iterativa e DFS recursiva usando somente a
-lista de adjacência.
+grafo, chama `get_components()` com BFS e exporta quantidade, menor e maior
+tamanho, além dos tamanhos de todas as componentes em ordem decrescente. A
+telemetria inclui os tempos de construção e dessa chamada inicial de
+`get_components()`, além da variação do RSS. `get_components()` exige uma
+fronteira explícita; o exportador usa instâncias independentes de BFS, DFS
+iterativa e Dijkstra com heap no benchmark.
 
-O benchmark usa até 100 vértices iniciais distintos,
-selecionados aleatoriamente com semente fixa, e mede BFS, DFS iterativa e DFS
-recursiva para cada origem. Se o grafo tiver menos de 100 vértices, usa todos
-eles. Os dados ficam em `benchmark.representacoes.lista`; as chaves históricas `BFS`,
-`DFS_Iterativa` e `DFS_Recursiva` continuam representando os tempos da lista.
-O total de origens executadas é registrado em
-`benchmark.numero_execucoes`. O exporter não constrói nem testa a matriz de
-adjacência. Para `get_components()`, a telemetria registra o RSS imediatamente
-antes e depois da chamada e a diferença entre esses valores em
+O benchmark executa cada fronteira `min(n, 100)` vezes sobre o grafo inteiro.
+Os resultados ficam em `benchmark_get_components`, com média, mediana e tempos
+brutos por algoritmo. O campo `v_plus_e` registra o total `n + m`; os gráficos
+de performance e profiling usam um ponto por grafo e esse `V+E` total. O
+exporter não constrói nem testa a matriz de adjacência. Para a chamada inicial
+de `get_components()`, a telemetria registra o RSS imediatamente antes e
+depois e a diferença entre esses valores em
 `memoria_get_components_delta_mb`; essa diferença é específica à etapa, não o
-pico transitório de alocações internas. No `export_json`, o peso não usado é
-armazenado como `int`, e a capacidade das listas de adjacência é reservada após
-contar os graus, reduzindo o uso de memória em grafos grandes.
+pico transitório de alocações internas. Nos exportadores, os pesos são
+armazenados como `double`, e a capacidade das listas de adjacência é
+reservada após contar os graus, reduzindo o uso de memória em grafos grandes.
 
 ### Comparar memória das representações
 
@@ -141,26 +157,49 @@ arquivo para comparar:
 ./export_memoria matriz < Dados/Entrada/grafo_1.txt
 ```
 
+Para medir a lista de adjacência de um grafo ponderado:
+
+```bash
+./export_memoria lista --weighted < Dados/Entrada/grafo_W_3.txt
+```
+
 Ambas as execuções imprimem um CSV com representação, número de vértices,
 número de arestas e `memoria_rss_mb`. A medição usa `VmRSS` de
 `/proc/self/status` (Linux), inclui a memória-base do processo e seus
 metadados, e não é o pico acumulado registrado no JSON. A lista armazena
-arestas como `Edge<int>` nas duas direções; a matriz armazena inteiros
-por célula e marca ambas as direções. A comparação é da memória residente total
-do processo naquele ponto.
+arestas nas duas direções (`Edge<int>` sem pesos e `Edge<double>` com pesos);
+a matriz armazena inteiros por célula e marca ambas as direções. A medição
+ponderada aceita somente lista de adjacência, para evitar alocação quadrática.
+A comparação é da memória residente total do processo naquele ponto.
 
 ## Gerar gráficos
 
-Depois de gerar os arquivos JSON e CSV para os grafos que serão analisados:
+Para gerar os resultados dos grafos não ponderados 1–6 e dos ponderados
+`grafo_W_3`–`grafo_W_5` e `rede_colaboracao`, além dos gráficos:
 
 ```bash
-python3 Analysers/main.py
+./gerar_dados.sh
 ```
 
-O analisador procura os dados em `Dados/JSON/`, `Dados/Grafos/` e
-`Dados/Graus/`, e grava os gráficos em `Dados/Graficos/`. São produzidos
-gráficos de desempenho e memória, perfil de tempo, histogramas de grau,
-árvores BFS/DFS e sobreposição das árvores.
+Para regenerar somente os gráficos com os JSONs que já existem, sem reler ou
+processar os arquivos grandes de entrada:
+
+```bash
+./gerar_dados.sh --graficos-only
+```
+
+O script compila os exportadores, grava JSONs e CSVs em `Dados/JSON/`,
+`Dados/Grafos/` e `Dados/Graus/`, e roda o analisador. Os gráficos numéricos
+usam escalas logarítmicas nos dois eixos. Desempenho e perfil de tempo agrupam
+as medições por componente amostrada e usam o `V+E` daquela componente. O
+gráfico de memória usa a variação de RSS de `get_components()` e o `V+E` do
+grafo inteiro, sem repetir o dado por componente. Histogramas
+mantêm a distribuição do grafo inteiro; topologias e overlays (BFS/DFS/Dijkstra)
+mostram a maior componente conexa e identificam seu próprio `V+E`. Diagramas
+de topologia não exibem eixos numéricos. A telemetria de memória continua
+representando a variação de RSS durante `get_components()`, não o pico de
+memória do Dijkstra; na escala logarítmica, deltas de memória nulos ou
+negativos não aparecem.
 
 ## Testes CSES
 

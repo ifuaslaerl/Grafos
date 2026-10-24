@@ -272,9 +272,12 @@ vector<int> Grafo<T>::traverse_impl(
     int start,
     vector<int>& parent,
     vector<T>& distance,
-    graph_lib::IFronteira<T>& frontier
+    graph_lib::IFronteira<T>& frontier,
+    int& undirected_edge_count
 ){
     vector<int> order;
+    int edge_visits = 0;
+    undirected_edge_count = 0;
     if(start < 1 || start > n){
         return order;
     }
@@ -290,38 +293,51 @@ vector<int> Grafo<T>::traverse_impl(
 
         order.push_back(entry.vertex);
         for(const Edge<T>& edge : adj[entry.vertex]){
+            ++edge_visits;
             frontier.explore(entry.vertex, edge, parent, distance);
         }
     }
 
+    undirected_edge_count = edge_visits / 2;
     return order;
 }
 
 template <typename T>
-vector<vector<int>> Grafo<T>::get_components(){
-    vector<vector<int>> components;
+void Grafo<T>::get_components(
+    vector<vector<int>>& components,
+    vector<int>& component_edge_counts,
+    graph_lib::IFronteira<T>& frontier
+){
+    components.clear();
+    component_edge_counts.clear();
     vector<int> parent(n + 1, 0);
-    vector<T> distance(n + 1, T{-1});
+    vector<T> distance(n + 1, numeric_limits<T>::infinity());
+    vector<pair<vector<int>, int>> components_with_edges;
 
     for(int vertex = 1; vertex <= n; ++vertex){
         if(parent[vertex] != 0){
             continue;
         }
 
-        graph_lib::BfsFrontier<T> frontier;
-        components.push_back(
-            traverse_impl(vertex, parent, distance, frontier)
-        );
+        int edge_count = 0;
+        vector<int> component =
+            traverse_impl(vertex, parent, distance, frontier, edge_count);
+        components_with_edges.push_back({move(component), edge_count});
     }
 
     sort(
-        components.begin(),
-        components.end(),
-        [](const vector<int>& lhs, const vector<int>& rhs){
-            return lhs.size() > rhs.size();
+        components_with_edges.begin(),
+        components_with_edges.end(),
+        [](const auto& lhs, const auto& rhs){
+            return lhs.first.size() > rhs.first.size();
         }
     );
-    return components;
+    components.reserve(components_with_edges.size());
+    component_edge_counts.reserve(components_with_edges.size());
+    for(auto& component : components_with_edges){
+        components.push_back(move(component.first));
+        component_edge_counts.push_back(component.second);
+    }
 }
 
 template <typename T>
@@ -335,7 +351,9 @@ vector<int> Grafo<T>::dfs(
 
     vector<T> traversal_distance(n + 1, T{-1});
     graph_lib::DfsFrontier<T> frontier;
-    vector<int> order = traverse_impl(start, parent, traversal_distance, frontier);
+    int edge_count = 0;
+    vector<int> order =
+        traverse_impl(start, parent, traversal_distance, frontier, edge_count);
     for(int vertex : order){
         distance[vertex] = static_cast<int>(traversal_distance[vertex]);
     }
@@ -353,7 +371,9 @@ vector<int> Grafo<T>::bfs(
 
     vector<T> traversal_distance(n + 1, T{-1});
     graph_lib::BfsFrontier<T> frontier;
-    vector<int> order = traverse_impl(start, parent, traversal_distance, frontier);
+    int edge_count = 0;
+    vector<int> order =
+        traverse_impl(start, parent, traversal_distance, frontier, edge_count);
     for(int vertex : order){
         distance[vertex] = static_cast<int>(traversal_distance[vertex]);
     }
@@ -379,7 +399,8 @@ vector<int> Grafo<T>::dijkstra_vector(
     parent[start] = start;
     distance[start] = T{};
     graph_lib::DijkstraVectorFrontier<T> frontier(n);
-    return traverse_impl(start, parent, distance, frontier);
+    int edge_count = 0;
+    return traverse_impl(start, parent, distance, frontier, edge_count);
 }
 
 template <typename T>
@@ -401,64 +422,8 @@ vector<int> Grafo<T>::dijkstra_heap(
     parent[start] = start;
     distance[start] = T{};
     graph_lib::DijkstraHeapFrontier<T> frontier;
-    return traverse_impl(start, parent, distance, frontier);
-}
-
-template <typename T>
-void Grafo<T>::dfs_recursiva_util(
-    int vertex,
-    int,
-    vector<int>& parents,
-    vector<T>& distance,
-    vector<int>& order
-){
-    vector<pair<int, size_t>> stack;
-    stack.reserve(n);
-    stack.push_back({vertex, 0});
-    parents[vertex] = vertex;
-    order.push_back(vertex);
-
-    while(!stack.empty()){
-        int current = stack.back().first;
-        size_t& next_edge = stack.back().second;
-        if(next_edge == adj[current].size()){
-            stack.pop_back();
-            continue;
-        }
-
-        const Edge<T>& edge = adj[current][next_edge++];
-        if(parents[edge.v] == 0){
-            parents[edge.v] = current;
-            distance[edge.v] = distance[current] + edge.w;
-            order.push_back(edge.v);
-            stack.push_back({edge.v, 0});
-        }
-    }
-}
-
-template <typename T>
-vector<int> Grafo<T>::dfs_recursiva(
-    int start,
-    vector<int>& parent,
-    vector<T>& distance
-){
-    parent.assign(n + 1, 0);
-    distance.assign(n + 1, numeric_limits<T>::infinity());
-    vector<int> order;
-    order.reserve(n);
-
-    if(start >= 1 && start <= n){
-        parent[start] = start;
-        distance[start] = T{};
-        dfs_recursiva_util(
-            start,
-            start,
-            parent,
-            distance,
-            order
-        );
-    }
-    return order;
+    int edge_count = 0;
+    return traverse_impl(start, parent, distance, frontier, edge_count);
 }
 
 template <typename T>
@@ -474,7 +439,8 @@ T Grafo<T>::get_dist(
     vector<int> parent(n + 1, 0);
     vector<T> distance(n + 1, numeric_limits<T>::infinity());
     distance[u] = T{};
-    traverse_impl(u, parent, distance, frontier);
+    int edge_count = 0;
+    traverse_impl(u, parent, distance, frontier, edge_count);
     return distance[v];
 }
 
@@ -482,8 +448,12 @@ template <typename T>
 int Grafo<T>::get_diameter(){
     int diameter = 0;
     vector<int> parent, distance;
+    vector<vector<int>> components;
+    vector<int> component_edge_counts;
+    graph_lib::BfsFrontier<T> frontier;
+    get_components(components, component_edge_counts, frontier);
 
-    for(const vector<int>& component : get_components()){
+    for(const vector<int>& component : components){
         if(component.empty()){
             continue;
         }

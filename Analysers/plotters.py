@@ -6,118 +6,165 @@ import matplotlib.lines as mlines
 import seaborn as sns
 import networkx as nx
 import numpy as np
-from config import OUTPUT_DIR, COLOR_BFS, COLOR_DFS_ITER, COLOR_DFS_REC, COLOR_BG, MAX_NODES
+from config import (
+    OUTPUT_DIR,
+    COLOR_BFS,
+    COLOR_DFS_ITER,
+    COLOR_DIJKSTRA,
+    COLOR_BG,
+    MAX_NODES,
+)
+
+PLOT_COLORS = {
+    "BFS": "#008c72",
+    "DFS_Iterativa": "#c2185b",
+    "Dijkstra_Heap": "#3159b8",
+}
 
 sys.setrecursionlimit(max(3000, 10*MAX_NODES))
 
 plt.style.use("dark_background")
 sns.set_theme(style="darkgrid", rc={"axes.facecolor": COLOR_BG, "figure.facecolor": COLOR_BG})
 
-def plot_performance_curve(data_list, scale="linear"):
-    if not data_list: return
-    v_plus_e = [d["v_plus_e"] for d in data_list]
-    
-    bfs_means = [d["benchmark"]["BFS"]["mean_ms"] for d in data_list]
-    bfs_medians = [d["benchmark"]["BFS"]["median_ms"] for d in data_list]
-    
-    dfs_i_means = [d["benchmark"]["DFS_Iterativa"]["mean_ms"] for d in data_list]
-    dfs_i_medians = [d["benchmark"]["DFS_Iterativa"]["median_ms"] for d in data_list]
-    
-    dfs_r_means = [d["benchmark"]["DFS_Recursiva"]["mean_ms"] for d in data_list]
-    dfs_r_medians = [d["benchmark"]["DFS_Recursiva"]["median_ms"] for d in data_list]
+def _style_standard_axes(figure, axis):
+    figure.set_facecolor("white")
+    axis.set_facecolor("white")
+    axis.tick_params(colors="#222222")
+    for spine in axis.spines.values():
+        spine.set_color("#444444")
 
-    plt.figure(figsize=(14, 8))
 
-    num_runs = len(data_list[0]["benchmark"]["BFS"]["raw_ms"])
-    for i in range(num_runs):
-        bfs_raw = [d["benchmark"]["BFS"]["raw_ms"][i] for d in data_list]
-        dfs_i_raw = [d["benchmark"]["DFS_Iterativa"]["raw_ms"][i] for d in data_list]
-        dfs_r_raw = [d["benchmark"]["DFS_Recursiva"]["raw_ms"][i] for d in data_list]
-        
-        label_bfs = "BFS (Execuções)" if i == 0 else None
-        label_dfs_i = "DFS Iter. (Execuções)" if i == 0 else None
-        label_dfs_r = "DFS Rec. (Execuções)" if i == 0 else None
-        
-        plt.plot(v_plus_e, bfs_raw, color=COLOR_BFS, alpha=0.15, linewidth=1, label=label_bfs)
-        plt.plot(v_plus_e, dfs_i_raw, color=COLOR_DFS_ITER, alpha=0.15, linewidth=1, label=label_dfs_i)
-        plt.plot(v_plus_e, dfs_r_raw, color=COLOR_DFS_REC, alpha=0.15, linewidth=1, label=label_dfs_r)
+def plot_performance_curve(data_list):
+    if not data_list:
+        return
+    algorithms = (
+        ("BFS", PLOT_COLORS["BFS"], "o"),
+        ("DFS_Iterativa", PLOT_COLORS["DFS_Iterativa"], "s"),
+        ("Dijkstra_Heap", PLOT_COLORS["Dijkstra_Heap"], "D"),
+    )
 
-    plt.plot(v_plus_e, bfs_medians, color=COLOR_BFS, marker='o', linestyle='--', linewidth=2, alpha=0.8, label="BFS (Mediana)")
-    plt.plot(v_plus_e, dfs_i_medians, color=COLOR_DFS_ITER, marker='s', linestyle='--', linewidth=2, alpha=0.8, label="DFS Iter. (Mediana)")
-    plt.plot(v_plus_e, dfs_r_medians, color=COLOR_DFS_REC, marker='^', linestyle='--', linewidth=2, alpha=0.8, label="DFS Rec. (Mediana)")
+    figure, axis = plt.subplots(figsize=(14, 8), facecolor="white")
+    _style_standard_axes(figure, axis)
+    for algorithm, color, marker in algorithms:
+        values = []
+        for graph in data_list:
+            stats = graph.get("benchmark_get_components", {}).get(algorithm, {})
+            mean = stats.get("mean_ms", 0)
+            median = stats.get("median_ms", 0)
+            if mean > 0 and median > 0:
+                values.append((graph["n"] + graph["m"], mean, median))
+        values.sort(key=lambda item: item[0])
+        if values:
+            x_values = [item[0] for item in values]
+            axis.plot(
+                x_values,
+                [item[1] for item in values],
+                color=color,
+                marker=marker,
+                linewidth=2,
+                label=f"{algorithm} (média)",
+            )
+            axis.plot(
+                x_values,
+                [item[2] for item in values],
+                color=color,
+                marker=marker,
+                linestyle="--",
+                linewidth=1.5,
+                alpha=0.75,
+                label=f"{algorithm} (mediana)",
+            )
 
-    plt.plot(v_plus_e, bfs_means, color=COLOR_BFS, marker='o', linestyle='-', linewidth=2.5, label="BFS (Média)")
-    plt.plot(v_plus_e, dfs_i_means, color=COLOR_DFS_ITER, marker='s', linestyle='-', linewidth=2.5, label="DFS Iter. (Média)")
-    plt.plot(v_plus_e, dfs_r_means, color=COLOR_DFS_REC, marker='^', linestyle='-', linewidth=2.5, label="DFS Rec. (Média)")
+    axis.set_xscale("log")
+    axis.set_yscale("log")
+    axis.set_xlabel("Vértices + arestas do grafo (V + E)", color="#222222")
+    axis.set_ylabel("Tempo de execução (ms)", color="#222222")
+    axis.legend(
+        facecolor="white",
+        edgecolor="#444444",
+        labelcolor="#222222",
+        bbox_to_anchor=(1.04, 1),
+        loc="upper left",
+    )
+    figure.tight_layout()
+    figure.savefig(
+        os.path.join(OUTPUT_DIR, "01_performance_curve_log.png"), dpi=300
+    )
+    plt.close(figure)
 
-    suffix, xlabel_suf, ylabel_suf = "_linear", "", ""
-    if scale == "log":
-        plt.xscale("log")
-        plt.yscale("log")
-        suffix, xlabel_suf, ylabel_suf = "_log", " [Escala Log]", " [Escala Log]"
+def plot_memory_curve(data_list):
+    if not data_list:
+        return
+    x_values, memory_values = [], []
+    for graph in data_list:
+        value = graph["telemetria"].get("memoria_get_components_delta_mb", 0)
+        if value > 0:
+            x_values.append(graph.get("v_plus_e", graph["n"] + graph["m"]))
+            memory_values.append(value)
 
-    plt.xlabel(f"Quantidade de Vértices + Arestas (V + E){xlabel_suf}", fontsize=12, color="lightgray")
-    plt.ylabel(f"Tempo de Execução (ms){ylabel_suf}", fontsize=12, color="lightgray")
-    
-    plt.legend(facecolor="#222222", edgecolor="white", labelcolor="white", bbox_to_anchor=(1.04, 1), loc="upper left")
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, f"01_performance_curve{suffix}.png"), dpi=300)
-    plt.close()
+    figure, axis = plt.subplots(figsize=(12, 7), facecolor="white")
+    _style_standard_axes(figure, axis)
+    axis.plot(
+        x_values,
+        memory_values,
+        color="#a66b00",
+        marker="D",
+        linewidth=2,
+        label="Variação de RSS em get_components()",
+    )
+    axis.set_xscale("log")
+    axis.set_yscale("log")
+    axis.set_xlabel("Quantidade de vértices + arestas do grafo (V + E)", color="#222222")
+    axis.set_ylabel("Variação de RSS em get_components() (MB)", color="#222222")
+    axis.legend(facecolor="white", edgecolor="#444444", labelcolor="#222222")
+    figure.tight_layout()
+    figure.savefig(os.path.join(OUTPUT_DIR, "02_memory_curve_log.png"), dpi=300)
+    plt.close(figure)
 
-def plot_memory_curve(data_list, scale="linear"):
-    if not data_list or "telemetria" not in data_list[0]: return
-    v_plus_e = [d["v_plus_e"] for d in data_list]
-    mem = [
-        d["telemetria"]["memoria_get_components_delta_mb"]
-        for d in data_list
-    ]
-    if scale == "log":
-        mem = [value if value > 0 else np.nan for value in mem]
+def plot_time_profiling(data_list):
+    if not data_list:
+        return
+    figure, axis = plt.subplots(figsize=(12, 7), facecolor="white")
+    _style_standard_axes(figure, axis)
+    for algorithm, color, marker in (
+        ("BFS", PLOT_COLORS["BFS"], "o"),
+        ("DFS_Iterativa", PLOT_COLORS["DFS_Iterativa"], "s"),
+        ("Dijkstra_Heap", PLOT_COLORS["Dijkstra_Heap"], "D"),
+    ):
+        values = []
+        for graph in data_list:
+            value = (
+                graph.get("benchmark_get_components", {})
+                .get(algorithm, {})
+                .get("mean_ms", 0)
+            )
+            if value > 0:
+                values.append((graph["n"] + graph["m"], value))
+        values.sort(key=lambda item: item[0])
+        if values:
+            axis.plot(
+                [item[0] for item in values],
+                [item[1] for item in values],
+                color=color,
+                marker=marker,
+                linewidth=2,
+                label=f"{algorithm} (média de get_components)",
+            )
 
-    plt.figure(figsize=(12, 7))
-    plt.plot(v_plus_e, mem, color="#ffcc00", marker='D', linestyle='-', linewidth=2, label="Variação de RSS em get_components")
-    plt.fill_between(v_plus_e, mem, color="#ffcc00", alpha=0.1)
+    axis.set_xscale("log")
+    axis.set_yscale("log")
+    axis.set_xlabel("Vértices + arestas do grafo (V + E)", color="#222222")
+    axis.set_ylabel("Tempo de get_components() (ms)", color="#222222")
+    axis.legend(
+        facecolor="white",
+        edgecolor="#444444",
+        labelcolor="#222222",
+        loc="upper left",
+    )
+    figure.tight_layout()
+    figure.savefig(os.path.join(OUTPUT_DIR, "03_time_profiling_log.png"), dpi=300)
+    plt.close(figure)
 
-    suffix, xlabel_suf, ylabel_suf = "_linear", "", ""
-    if scale == "log":
-        plt.xscale("log")
-        plt.yscale("log")
-        suffix, xlabel_suf, ylabel_suf = "_log", " [Escala Log]", " [Escala Log]"
-
-    plt.xlabel(f"Quantidade de Vértices + Arestas (V + E){xlabel_suf}", fontsize=12, color="lightgray")
-    plt.ylabel(f"Variação de RSS em get_components (MB){ylabel_suf}", fontsize=12, color="lightgray")
-    plt.legend(facecolor="#222222", edgecolor="white", labelcolor="white")
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, f"02_memory_curve{suffix}.png"), dpi=300)
-    plt.close()
-
-def plot_time_profiling(data_list, scale="linear"):
-    if not data_list or "telemetria" not in data_list[0]: return
-    
-    labels = [f"G{d['graph_id']}" for d in data_list]
-    build = np.array([d["telemetria"]["tempo_build_ms"] for d in data_list])
-    grau = np.array([d["telemetria"]["tempo_grau_ms"] for d in data_list])
-    comp = np.array([d["telemetria"]["tempo_comp_ms"] for d in data_list])
-    bfs = np.array([d["benchmark"]["BFS"]["mean_ms"] for d in data_list])
-
-    plt.figure(figsize=(12, 7))
-    plt.bar(labels, build, color="#555555", label="Construção (I/O)")
-    plt.bar(labels, grau, bottom=build, color="#888888", label="Cálculo de Graus")
-    plt.bar(labels, comp, bottom=build+grau, color="#ff007f", label="Extração Componentes")
-    plt.bar(labels, bfs, bottom=build+grau+comp, color="#00ffcc", label="BFS (Média)")
-
-    suffix, ylabel_suf = "_linear", ""
-    if scale == "log":
-        plt.yscale("log")
-        suffix, ylabel_suf = "_log", " [Escala Log]"
-
-    plt.xlabel("Grafos Analisados", fontsize=12, color="lightgray")
-    plt.ylabel(f"Tempo Acumulado (ms){ylabel_suf}", fontsize=12, color="lightgray")
-    plt.legend(facecolor="#222222", edgecolor="white", labelcolor="white", loc="upper left")
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, f"03_time_profiling{suffix}.png"), dpi=300)
-    plt.close()
 
 def plot_degree_histogram(csv_path, graph_id, v_plus_e):
     if not csv_path or not os.path.exists(csv_path): return
@@ -125,15 +172,25 @@ def plot_degree_histogram(csv_path, graph_id, v_plus_e):
     df = pd.read_csv(csv_path)
     if df.empty: return
     
-    plt.figure(figsize=(10, 6))
-    plt.bar(df['Grau'], df['Frequencia'], color="#00ffcc", alpha=0.8, edgecolor=COLOR_BG)
-    
-    plt.xlabel("Grau do Vértice", fontsize=12, color="lightgray")
-    plt.ylabel("Frequência Absoluta", fontsize=12, color="lightgray")
-    plt.title(f"Distribuição de Graus - Grafo {graph_id}", color="white")
-    plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, f"04_histograma_graus_grafo_{graph_id}_VE_{v_plus_e}.png"), dpi=300)
-    plt.close()
+    figure, axis = plt.subplots(figsize=(10, 6), facecolor="white")
+    _style_standard_axes(figure, axis)
+    x_values = df["Grau"]
+    axis.bar(
+        x_values,
+        df["Frequencia"],
+        color=PLOT_COLORS["BFS"],
+        alpha=0.8,
+        edgecolor="white",
+    )
+    axis.set_xlabel("Grau do vértice", color="#222222")
+    axis.set_ylabel("Frequência absoluta", color="#222222")
+    axis.set_title(f"Distribuição de Graus - Grafo {graph_id}", color="#222222")
+    figure.tight_layout()
+    figure.savefig(
+        os.path.join(OUTPUT_DIR, f"04_histograma_graus_grafo_{graph_id}.png"),
+        dpi=300,
+    )
+    plt.close(figure)
 
 def get_tree_pos(nodes, tree_edges):
     DG = nx.DiGraph()
@@ -175,11 +232,17 @@ def get_tree_pos(nodes, tree_edges):
         
     return pos
 
-def draw_network_tree_csv(csv_path, graph_id, v_plus_e, mode="BFS"):
+def draw_network_tree_csv(
+    csv_path, graph_id, v_plus_e, mode="BFS", component_id=None
+):
     if not csv_path or not os.path.exists(csv_path): return
     
     df = pd.read_csv(csv_path)
     if df.empty: return
+    if component_id is not None and "componente_conexa" in df.columns:
+        df = df[df["componente_conexa"] == component_id]
+        if df.empty:
+            return
 
     df = df.sort_values(by="ordem_visitacao")
 
@@ -209,10 +272,14 @@ def draw_network_tree_csv(csv_path, graph_id, v_plus_e, mode="BFS"):
     node_sizes = [min(v * 30 + 10, 300) for v in degrees.values()]
     node_colors = list(degrees.values())
     
-    plt.figure(figsize=(16, 12)) 
+    plt.figure(figsize=(16, 12), facecolor=COLOR_BG)
     nx.draw_networkx_nodes(G, pos, node_size=node_sizes, node_color=node_colors, cmap=plt.cm.magma, edgecolors="none")
     
-    tree_color = COLOR_BFS if mode == "BFS" else COLOR_DFS_ITER
+    tree_color = {
+        "BFS": COLOR_BFS,
+        "DFS": COLOR_DFS_ITER,
+        "Dijkstra": COLOR_DIJKSTRA,
+    }.get(mode, COLOR_DFS_ITER)
     nx.draw_networkx_edges(G, pos, edgelist=tree_edges, alpha=0.9, edge_color=tree_color, width=2.0)
     
     plt.axis("off")
@@ -220,78 +287,175 @@ def draw_network_tree_csv(csv_path, graph_id, v_plus_e, mode="BFS"):
     plt.savefig(os.path.join(OUTPUT_DIR, f"05_arvore_topologia_grafo_{graph_id}_VE_{v_plus_e}_{mode}.png"), dpi=300)
     plt.close()
 
-def draw_overlay_trees_csv(csv_bfs, csv_dfs, graph_id, v_plus_e):
-    if not csv_bfs or not os.path.exists(csv_bfs) or not csv_dfs or not os.path.exists(csv_dfs): return
+def draw_overlay_trees_csv(
+    csv_bfs,
+    csv_dfs,
+    graph_id,
+    v_plus_e,
+    csv_dijkstra=None,
+    component_id=None,
+):
+    paths = {"BFS": csv_bfs, "DFS": csv_dfs}
+    if csv_dijkstra and os.path.exists(csv_dijkstra):
+        paths["Dijkstra"] = csv_dijkstra
+    if any(not path or not os.path.exists(path) for path in paths.values()):
+        return
 
-    df_bfs = pd.read_csv(csv_bfs).sort_values(by="ordem_visitacao")
-    df_dfs = pd.read_csv(csv_dfs).sort_values(by="ordem_visitacao")
+    frames = {
+        name: pd.read_csv(path).sort_values(by="ordem_visitacao")
+        for name, path in paths.items()
+    }
+    if component_id is not None:
+        frames = {
+            name: frame[
+                frame["componente_conexa"] == component_id
+            ].copy()
+            if "componente_conexa" in frame.columns
+            else frame
+            for name, frame in frames.items()
+        }
+        if any(frame.empty for frame in frames.values()):
+            return
+    vertex_lists = {
+        name: frame["vertice"].tolist() for name, frame in frames.items()
+    }
+    selected = {name: set() for name in frames}
+    indices = {name: 0 for name in frames}
 
-    bfs_list = df_bfs['vertice'].tolist()
-    dfs_list = df_dfs['vertice'].tolist()
-
-    bfs_selected = set()
-    dfs_selected = set()
-
-    idx_bfs = 0
-    idx_dfs = 0
-    
-    while len(bfs_selected | dfs_selected) < MAX_NODES and (idx_bfs < len(bfs_list) or idx_dfs < len(dfs_list)):
-        if idx_bfs < len(bfs_list):
-            bfs_selected.add(bfs_list[idx_bfs])
-            idx_bfs += 1
-            
-        if len(bfs_selected | dfs_selected) >= MAX_NODES:
+    while len(set.union(*selected.values())) < MAX_NODES:
+        advanced = False
+        for name, vertices in vertex_lists.items():
+            if indices[name] >= len(vertices):
+                continue
+            selected[name].add(vertices[indices[name]])
+            indices[name] += 1
+            advanced = True
+            if len(set.union(*selected.values())) >= MAX_NODES:
+                break
+        if not advanced:
             break
-            
-        if idx_dfs < len(dfs_list):
-            dfs_selected.add(dfs_list[idx_dfs])
-            idx_dfs += 1
 
-    valid_nodes = bfs_selected | dfs_selected
+    def extract_tree_edges(frame, selected_vertices):
+        edges = set()
+        for _, row in frame.iterrows():
+            parent, vertex = int(row["pai"]), int(row["vertice"])
+            if (
+                parent != 0
+                and parent != vertex
+                and parent in selected_vertices
+                and vertex in selected_vertices
+            ):
+                edges.add(tuple(sorted((parent, vertex))))
+        return edges
 
-    def extract_tree_edges(df, selected_prefix):
-        edges = []
-        for _, row in df.iterrows():
-            u, v = int(row['pai']), int(row['vertice'])
-            if u != 0 and u != v and u in selected_prefix and v in selected_prefix:
-                edges.append(tuple(sorted((u, v))))
-        return set(edges)
+    edge_sets = {
+        name: extract_tree_edges(frames[name], selected[name])
+        for name in frames
+    }
+    valid_nodes = set.union(*selected.values())
+    graph = nx.Graph()
+    graph.add_nodes_from(valid_nodes)
+    for edges in edge_sets.values():
+        graph.add_edges_from(edges)
+    graph.remove_nodes_from(list(nx.isolates(graph)))
+    if not graph.nodes:
+        return
 
-    bfs_edges = extract_tree_edges(df_bfs, bfs_selected)
-    dfs_edges = extract_tree_edges(df_dfs, dfs_selected)
+    positions = nx.spring_layout(graph, seed=42, k=0.15, iterations=50)
+    plt.figure(figsize=(16, 12), facecolor=COLOR_BG)
+    nx.draw_networkx_nodes(
+        graph,
+        positions,
+        node_size=20,
+        node_color="#171717",
+        edgecolors="none",
+        alpha=0.8,
+    )
 
-    intersection_edges = list(bfs_edges.intersection(dfs_edges))
-    only_bfs = list(bfs_edges - dfs_edges)
-    only_dfs = list(dfs_edges - bfs_edges)
+    edge_owners = {}
+    for algorithm, edges in edge_sets.items():
+        for edge in edges:
+            edge_owners.setdefault(edge, set()).add(algorithm)
+    shared_edges = [
+        edge for edge, owners in edge_owners.items() if len(owners) >= 2
+    ]
+    exclusive_edges = {
+        algorithm: [
+            edge for edge in edges if edge_owners[edge] == {algorithm}
+        ]
+        for algorithm, edges in edge_sets.items()
+    }
+    algorithm_colors = {
+        "BFS": COLOR_BFS,
+        "DFS": COLOR_DFS_ITER,
+        "Dijkstra": COLOR_DIJKSTRA,
+    }
+    legend_handles = []
+    if shared_edges:
+        nx.draw_networkx_edges(
+            graph,
+            positions,
+            edgelist=shared_edges,
+            edge_color="white",
+            width=2.0,
+            alpha=0.85,
+        )
+        legend_handles.append(
+            mlines.Line2D(
+                [], [], color="white", linewidth=2, label="Compartilhada"
+            )
+        )
+    for algorithm, edges in exclusive_edges.items():
+        if not edges:
+            continue
+        color = algorithm_colors[algorithm]
+        nx.draw_networkx_edges(
+            graph,
+            positions,
+            edgelist=edges,
+            edge_color=color,
+            width=1.5,
+            alpha=0.85,
+            style="dashed" if algorithm == "DFS" else "solid",
+        )
+        legend_handles.append(
+            mlines.Line2D(
+                [],
+                [],
+                color=color,
+                linewidth=1.5,
+                linestyle="dashed" if algorithm == "DFS" else "solid",
+                label=f"Exclusivas {algorithm}",
+            )
+        )
 
-    G = nx.Graph()
-    G.add_nodes_from(valid_nodes)
-    G.add_edges_from(bfs_edges)
-    G.add_edges_from(dfs_edges)
-
-    isolated_nodes = list(nx.isolates(G))
-    G.remove_nodes_from(isolated_nodes)
-
-    if len(G.nodes) == 0: return
-
-    pos = nx.spring_layout(G, seed=42, k=0.15, iterations=50)
-
-    plt.figure(figsize=(16, 12)) 
-    
-    # Nós redesenhados para ficarem muito mais sutis (cinza escuro, pequenos e com leve transparência)
-    nx.draw_networkx_nodes(G, pos, node_size=20, node_color="#171717", edgecolors="none", alpha=0.8)
-
-    nx.draw_networkx_edges(G, pos, edgelist=intersection_edges, edge_color="white", width=2.5, alpha=0.9)
-    nx.draw_networkx_edges(G, pos, edgelist=only_bfs, edge_color=COLOR_BFS, width=1.5, alpha=0.7, style="solid")
-    nx.draw_networkx_edges(G, pos, edgelist=only_dfs, edge_color=COLOR_DFS_ITER, width=1.5, alpha=0.7, style="dashed")
-
-    line_ambos = mlines.Line2D([], [], color='white', linewidth=2.5, label='Arestas Comuns (BFS e DFS)')
-    line_bfs = mlines.Line2D([], [], color=COLOR_BFS, linewidth=1.5, label='Exclusivo BFS')
-    line_dfs = mlines.Line2D([], [], color=COLOR_DFS_ITER, linewidth=1.5, linestyle='dashed', label='Exclusivo DFS')
-    plt.legend(handles=[line_ambos, line_bfs, line_dfs], facecolor="#222222", edgecolor="white", labelcolor="white", loc="upper right", fontsize=12)
-
+    plt.legend(
+        handles=legend_handles,
+        facecolor=COLOR_BG,
+        edgecolor="white",
+        labelcolor="white",
+        loc="upper right",
+        fontsize=12,
+    )
     plt.axis("off")
-    plt.title(f"Sobreposição Topológica BFS x DFS - Grafo {graph_id}", color="white", fontsize=16)
+    has_dijkstra = "Dijkstra" in paths
+    algorithms = "BFS x DFS x Dijkstra" if has_dijkstra else "BFS x DFS"
+    output_name = (
+        "06_overlay_bfs_dfs_dijkstra"
+        if has_dijkstra
+        else "06_overlay_bfs_dfs"
+    )
+    plt.title(
+        f"Sobreposição Topológica {algorithms} - Grafo {graph_id}",
+        color="white",
+        fontsize=16,
+    )
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, f"06_overlay_bfs_dfs_grafo_{graph_id}_VE_{v_plus_e}.png"), dpi=300)
+    plt.savefig(
+        os.path.join(
+            OUTPUT_DIR,
+            f"{output_name}_grafo_{graph_id}_VE_{v_plus_e}.png",
+        ),
+        dpi=300,
+    )
     plt.close()

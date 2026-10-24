@@ -1,4 +1,5 @@
 #include <fstream>
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -37,11 +38,18 @@ int main(int argc, char* argv[]){
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    if(argc != 2 || (string(argv[1]) != "lista" && string(argv[1]) != "matriz")){
-        cerr << "Uso: export_memoria <lista|matriz> < entrada.txt\n";
+    if(argc < 2 || argc > 3 ||
+       (string(argv[1]) != "lista" && string(argv[1]) != "matriz") ||
+       (argc == 3 && string(argv[2]) != "--weighted")){
+        cerr << "Uso: export_memoria <lista|matriz> [--weighted] < entrada.txt\n";
         return 1;
     }
     const string representacao = argv[1];
+    const bool weighted = argc == 3;
+    if(weighted && representacao == "matriz"){
+        cerr << "A representacao matricial ponderada nao esta disponivel; use lista.\n";
+        return 1;
+    }
 
     int n;
     if(!(cin >> n) || n < 0){
@@ -54,15 +62,22 @@ int main(int argc, char* argv[]){
     auto ler_arestas = [&](auto&& adicionar_aresta){
         int u, v;
         while(cin >> u){
-            if(!(cin >> v)){
-                cerr << "Cada aresta deve conter dois vertices.\n";
+            double weight = 1;
+            if(!(cin >> v) || (weighted && !(cin >> weight))){
+                cerr << (weighted
+                    ? "Cada aresta ponderada deve conter u, v e peso.\n"
+                    : "Cada aresta deve conter dois vertices.\n");
                 return false;
             }
             if(u < 1 || u > n || v < 1 || v > n){
                 cerr << "Aresta com vertice fora do intervalo [1, " << n << "].\n";
                 return false;
             }
-            adicionar_aresta(u, v);
+            if(!isfinite(weight) || weight < 0){
+                cerr << "Os pesos devem ser finitos e nao negativos.\n";
+                return false;
+            }
+            adicionar_aresta(u, v, weight);
             ++grau[u];
             ++grau[v];
             ++m;
@@ -75,21 +90,32 @@ int main(int argc, char* argv[]){
     };
 
     if(representacao == "lista"){
-        vector<vector<Edge<int>>> adj(n + 1);
-        if(!ler_arestas([&](int u, int v){
-            adj[u].push_back({u, v, 1});
-            adj[v].push_back({v, u, 1});
-        })){
-            return 1;
-        }
-
         double memory_mb;
-        if(!get_resident_memory_mb(memory_mb)) return 1;
+        if(weighted){
+            vector<vector<Edge<double>>> adj(n + 1);
+            if(!ler_arestas([&](int u, int v, double weight){
+                adj[u].push_back({u, v, weight});
+                adj[v].push_back({v, u, weight});
+            })){
+                return 1;
+            }
+            if(!get_resident_memory_mb(memory_mb)) return 1;
+        } else{
+            vector<vector<Edge<int>>> adj(n + 1);
+            if(!ler_arestas([&](int u, int v, double){
+                adj[u].push_back({u, v, 1});
+                adj[v].push_back({v, u, 1});
+            })){
+                return 1;
+            }
+            if(!get_resident_memory_mb(memory_mb)) return 1;
+        }
         cout << "representacao,vertices,arestas,memoria_rss_mb\n";
-        cout << "lista," << n << "," << m << "," << memory_mb << "\n";
+        cout << (weighted ? "lista_ponderada," : "lista,")
+             << n << "," << m << "," << memory_mb << "\n";
     } else{
         vector<vector<int>> adj(n + 1, vector<int>(n + 1, 0));
-        if(!ler_arestas([&](int u, int v){
+        if(!ler_arestas([&](int u, int v, double){
             adj[u][v] = 1;
             adj[v][u] = 1;
         })){

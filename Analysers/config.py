@@ -13,7 +13,7 @@ GRAFOS_DIR = os.path.join(BASE_DIR, "Grafos")
 # Paleta de Cores do Projeto
 COLOR_BFS = "#00ffcc"
 COLOR_DFS_ITER = "#ff007f"
-COLOR_DFS_REC = "#ffcc00"
+COLOR_DIJKSTRA = "#7aa2ff"
 COLOR_BG = "#121212"
 
 # Configurações de Renderização e Limites
