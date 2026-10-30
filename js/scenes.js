@@ -103,81 +103,7 @@
   }
 
   // =================================================================
-  // Slide 2: lista de adjacencia sendo construida linha a linha
-  // =================================================================
-  function LibBuild(root) {
-    const base = GraphGen.EXEMPLOS.pdf;
-    const linhas = [String(base.nodes.length), ...base.edges.map((e) => `${e.u} ${e.v} ${Engine.fmt(e.w)}`)];
-    root.innerHTML = `
-      <div class="lib-grid">
-        <div class="card">
-          <h3>arquivo de entrada</h3>
-          <div class="file-lines">${linhas.map((l, i) => `<div class="fl" data-i="${i}"><span class="ln-n">${i + 1}</span>${l}</div>`).join("")}</div>
-          <pre class="code lib-code"><span class="ln"><span class="tok-k">void</span> <span class="tok-f">add_edge</span>(<span class="tok-k">int</span> u, <span class="tok-k">int</span> v, <span class="tok-t">T</span> w) {</span><span class="ln l-u">  adj[u].push_back({v, w});</span><span class="ln l-v">  adj[v].push_back({u, w});</span><span class="ln">  ++grau[u]; ++grau[v]; ++m;</span><span class="ln">}</span></pre>
-          <div class="row">
-            <button class="btn primary b-play">${ICON.play} construir</button>
-            <button class="btn b-step">${ICON.next} passo</button>
-            <button class="btn b-reset">${ICON.reset}</button>
-          </div>
-        </div>
-        <div class="card"><h3>grafo · passe o mouse</h3><div class="gw-canvas readonly lib-canvas" style="flex:1;min-height:240px"></div>
-          <div class="note lib-count"></div></div>
-        <div class="card"><h3>vector&lt;vector&lt;Edge&lt;T&gt;&gt;&gt; adj</h3><div class="adj-list lib-adj"></div></div>
-      </div>`;
-    const q = (s) => root.querySelector(s);
-    const view = new GraphView(q(".lib-canvas"), { showWeights: true, onHover: (v) => hl(v) });
-    let step = 0, timer = null;
-    const adjRows = () => q(".lib-adj");
-
-    function render(animate) {
-      const edges = base.edges.slice(0, Math.max(0, step - 1));
-      const nodes = step >= 1 ? base.nodes : [];
-      view.setGraph({ nodes, edges }, 1);
-      root.querySelectorAll(".fl").forEach((f) => f.classList.toggle("on", +f.dataset.i === step - 1));
-      root.querySelectorAll(".fl").forEach((f) => f.classList.toggle("done", +f.dataset.i < step - 1));
-      const adj = Engine.buildAdj({ nodes, edges });
-      adjRows().innerHTML = nodes.length
-        ? adj.slice(1).map((arr, i) => `<div class="adj-row" data-v="${i + 1}"><span class="k">${i + 1} →</span>${arr.map((e) => {
-          const fresh = animate && edges.length && e.id === edges[edges.length - 1].id;
-          return `<span class="cell ${fresh ? "fresh" : ""}">${e.v}<i>, ${Engine.fmt(e.w)}</i></span>`;
-        }).join("")}</div>`).join("")
-        : `<span class="muted">vazio: a primeira linha ainda não foi lida</span>`;
-      adjRows().querySelectorAll(".adj-row").forEach((r) => {
-        r.addEventListener("mouseenter", () => hl(+r.dataset.v));
-        r.addEventListener("mouseleave", () => hl(null));
-      });
-      const last = edges[edges.length - 1];
-      root.querySelectorAll(".lib-code .l-u, .lib-code .l-v").forEach((l) => l.classList.toggle("hl", !!last && animate));
-      if (last && animate) {
-        view.gEdges.selectAll("g.g-edge").filter((d) => d.id === last.id).classed("active", true);
-        view.gNodes.selectAll("g.g-node").filter((d) => d.id === last.u || d.id === last.v).classed("current", true);
-      }
-      q(".lib-count").innerHTML = step === 0 ? "aperte <b>construir</b>"
-        : `n = <b>${nodes.length}</b> · m = <b>${edges.length}</b> arestas → <b>${2 * edges.length}</b> entradas na lista (cada aresta aparece nas duas pontas)`;
-    }
-    function hl(v) {
-      if (step < linhas.length) return;
-      adjRows().querySelectorAll(".adj-row").forEach((r) => r.classList.toggle("hover", +r.dataset.v === v));
-      if (!v) { view.render(null); return; }
-      const adj = Engine.buildAdj(view.graph);
-      view.render(null, { highlightNodes: [v, ...adj[v].map((e) => e.v)], highlightEdges: adj[v].map((e) => e.id) });
-    }
-    const next = () => { if (step < linhas.length) { step++; render(true); } if (step >= linhas.length) stop(); };
-    function play() {
-      if (step >= linhas.length) { step = 0; render(false); }
-      q(".b-play").innerHTML = `${ICON.pause} pausar`;
-      timer = setInterval(next, 1100);
-    }
-    function stop() { clearInterval(timer); timer = null; q(".b-play").innerHTML = `${ICON.play} construir`; }
-    q(".b-play").addEventListener("click", () => (timer ? stop() : play()));
-    q(".b-step").addEventListener("click", () => { stop(); next(); });
-    q(".b-reset").addEventListener("click", () => { stop(); step = 0; render(false); });
-    render(false);
-    return { enter() { if (step === 0) setTimeout(play, 500); }, leave: stop };
-  }
-
-  // =================================================================
-  // Slide 3: as quatro fronteiras rodando ao mesmo tempo
+  // Slide 2: as quatro fronteiras rodando ao mesmo tempo
   // =================================================================
   const QUAD = [
     { k: "bfs", regra: "sai quem <b>entrou primeiro</b>", estrutura: "Fila" },
@@ -266,7 +192,7 @@
   }
 
   // =================================================================
-  // Slide 5: vetor x heap com o grafo em 3D girando
+  // Slide 4: vetor x heap com o grafo em 3D girando
   // =================================================================
   function heapTree(items, dist, rootEntry) {
     if (!items.length) return `<div class="chips"><span class="empty">vazio</span></div>`;
@@ -430,7 +356,7 @@
   }
 
   // =================================================================
-  // Slide 9: arvore real crescendo por layout de forca
+  // Slide 8: arvore real crescendo por layout de forca
   // =================================================================
   const EXPLICA = {
     bfs: (i) => `<p><b class="c-bfs">BFS · fila.</b> Sai quem entrou primeiro. Ao visitar a origem, <b>todos os ${i.filhosRaiz} vizinhos</b> entram na fila antes de qualquer outro vértice,
@@ -522,7 +448,7 @@
   }
 
   // =================================================================
-  // Slide 10: explorador 3D das arvores reais (BFS + DFS + Dijkstra)
+  // Slide 9: explorador 3D das arvores reais (BFS + DFS + Dijkstra)
   // =================================================================
   function Explorer3D(container, onStats) {
     if (!has3D) {
@@ -675,5 +601,5 @@
     }).observe(container);
   }
 
-  window.Scenes = { Cover3D, LibBuild, QuadRun, VecHeap3D, ForceTree, Explorer3D, ResearchGraph, EXPLICA, has3D };
+  window.Scenes = { Cover3D, QuadRun, VecHeap3D, ForceTree, Explorer3D, ResearchGraph, EXPLICA, has3D };
 })();

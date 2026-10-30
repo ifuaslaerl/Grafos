@@ -32,22 +32,7 @@
 }
 
 /* ==========================================================
-   Slide 2 · construindo a lista
-   ========================================================== */
-.lib-host { min-height: 0; }
-.lib-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; flex: 1; min-height: 0; }
-.file-lines { font-family: var(--font-mono); font-size: 13.5px; background: #0d1017; border: 1px solid var(--line-soft); border-radius: var(--radius-sm); padding: 8px 0; }
-.fl { padding: 2px 12px; border-left: 3px solid transparent; color: var(--faint); transition: background .3s, color .3s, border-color .3s; }
-.fl .ln-n { display: inline-block; width: 22px; color: var(--faint); opacity: .6; }
-.fl.done { color: var(--text-2); }
-.fl.on { color: var(--text); background: color-mix(in srgb, var(--dij) 16%, transparent); border-left-color: var(--dij); }
-.lib-code { --alg: var(--dij); }
-.lib-adj { font-family: var(--font-mono); font-size: 13px; display: flex; flex-direction: column; gap: 4px; overflow: auto; }
-.adj-row .cell.fresh { animation: cell-in .7s cubic-bezier(.2, .9, .3, 1.4); border-color: var(--dij); color: var(--text); background: color-mix(in srgb, var(--dij) 22%, var(--surface-2)); }
-@keyframes cell-in { from { opacity: 0; transform: translateX(-14px) scale(.7); } }
-
-/* ==========================================================
-   Slide 3 · quatro fronteiras
+   Slide 2 · quatro fronteiras
    ========================================================== */
 .quad-host { min-height: 0; }
 .quad-grid { display: grid; grid-template-columns: minmax(340px, .9fr) minmax(0, 2fr); gap: 16px; flex: 1; min-height: 0; }
@@ -75,7 +60,7 @@
 .qp-order { color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; text-align: left; flex: 1; min-width: 0; }
 
 /* ==========================================================
-   Slide 5 · vetor x heap em 3D
+   Slide 4 · vetor x heap em 3D
    ========================================================== */
 .vh-host { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
 .vh-host > .row { flex-wrap: wrap; }
@@ -105,7 +90,7 @@
 .race-fill { height: 100%; width: 0; border-radius: 6px; transition: width .6s cubic-bezier(.2, .7, .2, 1); }
 
 /* ==========================================================
-   Slide 9 · forma das árvores
+   Slide 8 · forma das árvores
    ========================================================== */
 .tree-chart { overflow: hidden; border-radius: var(--radius-sm); background: radial-gradient(500px 300px at 50% 50%, rgba(255, 255, 255, .03), transparent 70%); cursor: grab; }
 .tree-chart:active { cursor: grabbing; }
@@ -113,7 +98,7 @@
 .explica b { color: var(--text); }
 
 /* ==========================================================
-   Slide 10 · explorador 3D
+   Slide 9 · explorador 3D
    ========================================================== */
 .x3d { position: absolute; inset: 0; background: radial-gradient(700px 500px at 50% 45%, rgba(255, 61, 139, .07), transparent 70%), var(--bg-2); }
 .x3d-body > .card:first-child { min-height: 420px; }
@@ -144,7 +129,7 @@
 .rg-node.origem text, .rg-node.alvo text { fill: var(--text); font-weight: 600; font-size: 13px; }
 
 @media (max-width: 1100px) {
-  .lib-grid, .quad-grid, .vh-grid { grid-template-columns: 1fr; }
+  .quad-grid, .vh-grid { grid-template-columns: 1fr; }
   .quad-panels { grid-template-columns: 1fr; grid-template-rows: none; }
   .qp-canvas { min-height: 220px; }
 }

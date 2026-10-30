@@ -28,8 +28,6 @@
       return { enter: c.start, leave: c.stop };
     },
 
-    lib(s) { return Scenes.LibBuild(s.querySelector(".lib-host")); },
-
     frontier(s) { return Scenes.QuadRun(s.querySelector(".quad-host")); },
 
     dijkstra(s) {
