@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Biblioteca de Grafos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/scenes.css" />
+  <script>window.__errs=[];addEventListener("error",function(e){__errs.push(String(e.message));document.documentElement.setAttribute("data-errs",__errs.join(" | "))});</script>
+</head>
+<body>
+  <div class="progress"></div>
+
+  <div class="topbar">
+    <span class="brand">COS 242 · TEORIA DOS GRAFOS · 2026/2</span>
+    <button class="timer" title="Clique para iniciar/pausar (T). Duplo clique zera."><span class="dot"></span><span class="tv">08:00</span></button>
+  </div>
+
+  <main class="deck">
+
+    <!-- 1 · Capa -->
+    <section class="slide slide-cover" data-title="Capa" data-init="cover">
+      <div class="cover-bg"></div>
+      <div class="cover-content">
+        <span class="kicker" style="--accent:var(--bfs)">Trabalho de disciplina · Parte 2</span>
+        <h1>Biblioteca de Grafos<br />com pesos e Dijkstra</h1>
+        <p class="lead">Uma biblioteca em C++ que representa grafos com pesos reais e encontra distâncias e caminhos mínimos.
+          O Dijkstra foi implementado de duas formas, com vetor e com heap, usando <b>um único algoritmo</b>.</p>
+        <div class="cover-meta">
+          <span class="pill"><span class="sw" style="background:var(--bfs)"></span>Reginaldo Gama</span>
+          <span class="pill"><span class="sw" style="background:var(--dfs)"></span>Luís Rafael Sena</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 · Lista de adjacência sendo construída -->
+    <section class="slide" data-title="Lendo o grafo" data-init="lib" style="--accent:var(--dij)">
+      <div class="slide-head">
+        <span class="kicker">Representação</span>
+        <h2>Do arquivo para a lista de adjacência</h2>
+        <p class="lead">Cada linha <code>u v peso</code> vira uma chamada de <code>add_edge</code>. A aresta entra <b>duas vezes</b> na lista, uma em cada ponta, porque o grafo não é direcionado.
+          O tipo do peso é um parâmetro (<code>Grafo&lt;T&gt;</code>) com padrão <code>T{1}</code>, então os grafos sem peso da Parte 1 continuam funcionando.</p>
+      </div>
+      <div class="slide-body lib-host"></div>
+    </section>
+
+    <!-- 3 · Memória -->
+    <section class="slide" data-title="Lista × matriz" data-init="mem" style="--accent:var(--vec)">
+      <div class="slide-head">
+        <span class="kicker">Memória</span>
+        <h2>Por que lista de adjacência?</h2>
+        <p class="lead">A matriz reserva <b>n²</b> células, mesmo que quase todas fiquem vazias. Guardar cada célula em 1 bit (<code>vector&lt;bool&gt;</code>/bitset) deixa a matriz 32× menor,
+          mas ela <b>continua sendo n²</b>. A lista guarda só as <b>2m</b> arestas que existem.</p>
+      </div>
+      <div class="slide-body grid-2-wide" style="align-items:start">
+        <div class="card">
+          <div class="row">
+            <select class="sel mem-graph"></select>
+            <div class="seg mem-type">
+              <button data-t="int">int</button><button data-t="double">double</button><button data-t="long double" class="on">long double</button>
+            </div>
+          </div>
+          <div class="row mem-custom" style="display:none">
+            <span class="mono muted" style="font-size:12px;min-width:84px">n = <b class="mn"></b></span>
+            <input type="range" class="big mem-n" min="2" max="8" step="0.01" value="5" />
+          </div>
+          <div class="mem-bars"></div>
+          <div class="note"><span style="color:var(--warn)">▍</span> linha amarela = 16 GB de RAM · escala logarítmica de 1 KB a 1 EB</div>
+          <div class="mem-verdict"></div>
+        </div>
+        <div class="card">
+          <h3>Grafos reais são esparsos</h3>
+          <div class="sparse-host"></div>
+          <div class="stats mem-stats"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · BFS -->
+    <section class="slide" data-title="BFS ao vivo" data-init="bfs" style="--accent:var(--bfs)">
+      <div class="slide-head">
+        <span class="kicker">Busca em largura</span>
+        <h2>BFS: camada por camada</h2>
+        <p class="lead">A <b>fila</b> faz todos os vértices a distância k saírem antes dos que estão a distância k+1. Por isso a BFS encontra o <b>menor número de arestas</b> até cada vértice.
+          Experimente formatos diferentes: na <b>grade</b> ela avança como uma onda, e no <b>ciclo</b> ela anda nos dois sentidos ao mesmo tempo.</p>
+      </div>
+      <div class="slide-body"><div class="w-bfs" style="display:flex;flex:1;min-height:0"></div></div>
+    </section>
+
+    <!-- 5 · DFS -->
+    <section class="slide" data-title="DFS ao vivo" data-init="dfs" style="--accent:var(--dfs)">
+      <div class="slide-head">
+        <span class="kicker">Busca em profundidade</span>
+        <h2>DFS: mergulhar primeiro</h2>
+        <p class="lead">Trocando a fila por uma <b>pilha</b>, o mesmo laço segue um caminho até o fim antes de voltar. Na <b>grade</b> ela faz uma "cobrinha", e no <b>ciclo</b> dá a volta inteira para um lado só.
+          É <b>iterativa</b>, então não estoura a pilha de recursão com milhões de vértices.</p>
+      </div>
+      <div class="slide-body"><div class="w-dfs" style="display:flex;flex:1;min-height:0"></div></div>
+    </section>
+
+    <!-- 6 · Quatro fronteiras -->
+    <section class="slide" data-title="Um algoritmo, quatro fronteiras" data-init="frontier" style="--accent:var(--dij)">
+      <div class="slide-head">
+        <span class="kicker">Decisão de projeto</span>
+        <h2>Um laço só. Muda apenas <em>quem sai primeiro</em>.</h2>
+        <p class="lead">Todas as buscas repetem os mesmos passos: <b>tirar</b> um vértice da fronteira, <b>visitar</b> e <b>colocar os vizinhos</b>. Escrevemos esse laço uma vez só (<code>traverse_impl</code>).
+          A estrutura de dados plugada nele (a <code>IFronteira</code>) decide a ordem. Abaixo, as quatro buscas rodam ao mesmo tempo no mesmo grafo. Os pontinhos coloridos no código mostram em que linha cada uma está.</p>
+      </div>
+      <div class="slide-body quad-host"></div>
+    </section>
+
+    <!-- 7 · Dijkstra -->
+    <section class="slide" data-title="Dijkstra ao vivo" data-init="dijkstra" style="--accent:var(--dij)">
+      <div class="slide-head">
+        <span class="kicker">Caminho mínimo com pesos</span>
+        <h2>Dijkstra e o aviso de peso negativo</h2>
+        <p class="lead">Começamos com o grafo da Figura 1, que tem a aresta <b class="c-danger">3–4 com peso −9,5</b>. Nesse caso a biblioteca <b>recusa</b> rodar e avisa, como o enunciado pede.
+          Corrija o peso (clique nele) ou use o botão. Depois, passe o mouse num vértice para ver o caminho mínimo até ele.</p>
+      </div>
+      <div class="slide-body"><div class="w-dij" style="display:flex;flex:1;min-height:0"></div></div>
+    </section>
+
+    <!-- 8 · Vetor x heap 3D -->
+    <section class="slide" data-title="Vetor × heap" data-init="dual" style="--accent:var(--vec)">
+      <div class="slide-head">
+        <span class="kicker">Duas implementações do Dijkstra</span>
+        <h2>Vetor × heap: quem acha o próximo mais rápido?</h2>
+        <p class="lead">A cada passo o Dijkstra precisa do vértice <b>mais próximo</b> ainda não finalizado. O <b class="c-vec">vetor</b> confere os n vértices, um por um (a faixa amarela pisca inteira).
+          No <b class="c-dij">heap</b> o menor já está na raiz e só uma descida pela árvore é feita. Os dois finalizam os mesmos vértices na mesma ordem, mas o custo é bem diferente.</p>
+      </div>
+      <div class="slide-body vh-host"></div>
+    </section>
+
+    <!-- 9 · Escala -->
+    <section class="slide" data-title="Escala: n² × (n+m) log n" data-init="theory" style="--accent:var(--vec)">
+      <div class="slide-head">
+        <span class="kicker">Complexidade nos grafos reais</span>
+        <h2>Quando o vetor deixa de ser opção</h2>
+        <p class="lead">Cada grafo do trabalho tem dois pontos: as operações do <b class="c-vec">vetor</b> (n²) e as do <b class="c-dij">heap</b> ((n+m)·log n).
+          Passe o mouse para ver a estimativa de tempo a <b>1 ns por operação</b>. O Estudo de Caso 2 traz a medição real.</p>
+      </div>
+      <div class="slide-body grid-2-wide">
+        <div class="card"><div class="chart theory-chart"></div></div>
+        <div class="card">
+          <h3>Estimativa a 1 ns/op</h3>
+          <div class="table-wrap"><table class="dtable theory-table"></table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 · Os grafos -->
+    <section class="slide" data-title="Os grafos" data-init="graphs" style="--accent:var(--dij)">
+      <div class="slide-head">
+        <span class="kicker">Dados</span>
+        <h2>Os grafos analisados</h2>
+        <p class="lead">De <b>10 mil</b> a <b>10 milhões</b> de vértices e até <b>46 milhões</b> de arestas. Clique numa linha para ver a distribuição de graus.</p>
+      </div>
+      <div class="slide-body grid-2" style="grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)">
+        <div class="card"><div class="table-wrap"><table class="dtable graphs-table"></table></div></div>
+        <div class="card">
+          <div class="row"><h3 class="deg-title">Distribuição de graus</h3><span class="spacer"></span>
+            <div class="seg deg-scale"><button data-s="lin" class="on">linear</button><button data-s="log">log</button></div></div>
+          <div class="chart deg-chart"></div>
+          <div class="stats deg-stats"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 · Desempenho -->
+    <section class="slide" data-title="Quanto custa cada busca" data-init="perf" style="--accent:var(--bfs)">
+      <div class="slide-head">
+        <span class="kicker">Benchmarks · média de 100 execuções por grafo</span>
+        <h2>O Dijkstra custa mais que a BFS e a DFS?</h2>
+        <p class="lead perf-lead"></p>
+      </div>
+      <div class="slide-body grid-2-wide">
+        <div class="card">
+          <div class="row"><div class="legend perf-legend"></div><span class="spacer"></span>
+            <div class="seg perf-stat"><button data-s="media" class="on">média</button><button data-s="mediana">mediana</button></div></div>
+          <div class="chart perf-chart"></div>
+        </div>
+        <div class="card">
+          <div class="row"><h3 class="strip-title"></h3></div>
+          <div class="chart strip-chart" style="min-height:200px"></div>
+          <div class="stats strip-stats"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 · Árvores -->
+    <section class="slide" data-title="A forma de cada busca" data-init="trees" style="--accent:var(--bfs)">
+      <div class="slide-head">
+        <span class="kicker">Árvores reais · primeiros 220 vértices visitados a partir do vértice 1</span>
+        <h2>A forma de cada busca</h2>
+      </div>
+      <div class="slide-body grid-2-wide">
+        <div class="card">
+          <div class="row">
+            <select class="sel tree-graph"></select>
+            <div class="seg tree-alg">
+              <button data-a="bfs" class="on"><span class="sw c-bfs"></span>BFS</button>
+              <button data-a="dfs"><span class="sw c-dfs"></span>DFS</button>
+              <button data-a="dijkstra"><span class="sw c-dij"></span>Dijkstra</button>
+            </div>
+            <span class="spacer"></span>
+            <button class="btn tree-replay"></button>
+          </div>
+          <div class="chart tree-chart" style="min-height:380px"></div>
+          <div class="note">A origem é o ponto branco. Arraste para mover e use a roda do mouse para zoom.</div>
+        </div>
+        <div class="card">
+          <h3>Por que essa forma?</h3>
+          <div class="explica"></div>
+          <div class="stats tree-stats"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13 · 3D -->
+    <section class="slide" data-title="As árvores em 3D" data-init="gallery" style="--accent:var(--dfs)">
+      <div class="slide-head">
+        <span class="kicker">BFS × DFS × Dijkstra sobrepostas</span>
+        <h2>As três árvores em 3D</h2>
+        <p class="lead">Os primeiros vértices visitados pelas três buscas a partir do vértice 1, no mesmo espaço. As arestas em <b>branco</b> são compartilhadas,
+          e as coloridas aparecem em uma busca só. Arraste para girar e use a roda para zoom.</p>
+      </div>
+      <div class="slide-body grid-2-wide x3d-body">
+        <div class="card" style="padding:0;overflow:hidden;position:relative">
+          <div class="x3d"></div>
+          <div class="gallery-wrap" style="display:none;padding:16px;overflow:auto"><div class="gallery"></div></div>
+        </div>
+        <div class="card">
+          <div class="seg x3d-tab"><button data-t="3d" class="on">3D interativo</button><button data-t="img">imagens dos Analysers</button></div>
+          <select class="sel x3d-graph"></select>
+          <div class="seg x3d-algs">
+            <button data-a="bfs" class="on"><span class="sw c-bfs"></span>BFS</button>
+            <button data-a="dfs" class="on"><span class="sw c-dfs"></span>DFS</button>
+            <button data-a="dijkstra" class="on"><span class="sw c-dij"></span>Dijkstra</button>
+          </div>
+          <div class="row"><span class="mono muted" style="font-size:12px">vértices por busca</span><input type="range" class="x3d-n" min="100" max="1500" step="50" value="700" style="flex:1;accent-color:var(--dfs)"/><span class="mono x3d-nv" style="font-size:12px">700</span></div>
+          <label class="mono muted" style="font-size:12px;display:flex;gap:6px;align-items:center"><input type="checkbox" class="x3d-rot" checked /> girar automaticamente</label>
+          <div class="stats x3d-stats"></div>
+          <p class="note">A <b class="c-dfs">DFS</b> aparece como um fio longo que sai da origem. A <b class="c-bfs">BFS</b> forma um "dente-de-leão" em volta dela, e o <b class="c-dij">Dijkstra</b> fica no meio do caminho.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14 · Estudo 1 -->
+    <section class="slide" data-title="Estudo 1: distâncias a partir de 10" data-init="e1" style="--accent:var(--dij)">
+      <div class="slide-head">
+        <span class="kicker">Estudo de caso 1</span>
+        <h2>Distância e caminho mínimo a partir do vértice 10</h2>
+        <p class="lead">Para cada grafo com pesos: a distância e o caminho de <b>10</b> até <b>20, 30, 40, 50 e 60</b>, calculados com <code>dijkstra_heap</code>.</p>
+      </div>
+      <div class="slide-body e1-body"></div>
+    </section>
+
+    <!-- 15 · Estudo 2 -->
+    <section class="slide" data-title="Estudo 2: vetor × heap medido" data-init="e2" style="--accent:var(--vec)">
+      <div class="slide-head">
+        <span class="kicker">Estudo de caso 2</span>
+        <h2>Tempo médio: Dijkstra com vetor × com heap</h2>
+        <p class="lead e2-lead">Sorteamos vértices iniciais, medimos cada execução e tiramos a média.</p>
+      </div>
+      <div class="slide-body e2-body"></div>
+    </section>
+
+    <!-- 16 · Estudo 3 -->
+    <section class="slide" data-title="Estudo 3: rede de colaboração" data-init="e3" style="--accent:var(--bfs)">
+      <div class="slide-head">
+        <span class="kicker">Estudo de caso 3 · rede de colaboração em Computação</span>
+        <h2>De Edsger W. Dijkstra a…</h2>
+        <p class="lead">O peso de uma aresta é inversamente proporcional ao número de artigos em coautoria: <b>quanto menor, mais próximos</b>. Passe o mouse num pesquisador para destacar o caminho até ele.</p>
+      </div>
+      <div class="slide-body e3-body"></div>
+    </section>
+
+    <!-- 17 · Conclusões -->
+    <section class="slide" data-title="Conclusões" data-init="end" style="--accent:var(--ok)">
+      <div class="slide-head">
+        <span class="kicker">Para levar</span>
+        <h2>Conclusões</h2>
+      </div>
+      <div class="slide-body">
+        <div class="takeaways end-cards"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="navbar">
+    <button class="nav-prev" title="Anterior (←)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+    <span class="count"><b class="cur">1</b> / <span class="tot"></span></span>
+    <button class="nav-next" title="Próximo (→)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button class="nav-overview" title="Visão geral (O)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+    <button class="nav-full" title="Tela cheia (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </nav>
+
+  <div class="overview"><h2>Visão geral</h2><div class="overview-grid"></div></div>
+  <div class="lightbox"><div class="lb-bar"><span class="lb-title"></span><button class="btn lb-close">Fechar (Esc)</button></div><div class="stage"><img alt="" /></div></div>
+
+  <script src="js/vendor/d3.v7.min.js"></script>
+  <script src="js/vendor/3d-force-graph.min.js"></script>
+  <script src="data/dados.js"></script>
+  <script src="data/dados3d.js"></script>
+  <script src="data/estudos.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/graphview.js"></script>
+  <script src="js/widgets.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/scenes.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
