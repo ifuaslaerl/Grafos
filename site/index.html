@@ -36,29 +36,18 @@
       </div>
     </section>
 
-    <!-- 2 · Quatro fronteiras -->
-    <section class="slide" data-title="Um algoritmo, quatro fronteiras" data-init="frontier" style="--accent:var(--dij)">
+    <!-- 2 · Três fronteiras -->
+    <section class="slide" data-title="Um algoritmo, três fronteiras" data-init="frontier" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Decisão de projeto</span>
         <h2>Um laço só. Muda apenas <em>quem sai primeiro</em>.</h2>
         <p class="lead">Todas as buscas repetem os mesmos passos: <b>tirar</b> um vértice da fronteira, <b>visitar</b> e <b>colocar os vizinhos</b>. Escrevemos esse laço uma vez só (<code>traverse_impl</code>).
-          A estrutura de dados plugada nele (a <code>IFronteira</code>) decide a ordem. Abaixo, as quatro buscas rodam ao mesmo tempo no mesmo grafo. Os pontinhos coloridos no código mostram em que linha cada uma está.</p>
+          A estrutura de dados plugada nele (a <code>IFronteira</code>) decide a ordem. Abaixo, as três buscas rodam ao mesmo tempo no mesmo grafo. O Dijkstra com vetor e com heap visita na mesma ordem, então aparece uma vez só: a diferença entre os dois é só de tempo (próximo slide). Os pontinhos coloridos no código mostram em que linha cada uma está.</p>
       </div>
       <div class="slide-body quad-host"></div>
     </section>
 
-    <!-- 3 · Dijkstra -->
-    <section class="slide" data-title="Dijkstra ao vivo" data-init="dijkstra" style="--accent:var(--dij)">
-      <div class="slide-head">
-        <span class="kicker">Caminho mínimo com pesos</span>
-        <h2>Dijkstra e o aviso de peso negativo</h2>
-        <p class="lead">Começamos com o grafo da Figura 1, que tem a aresta <b class="c-danger">3–4 com peso −9,5</b>. Nesse caso a biblioteca <b>recusa</b> rodar e avisa, como o enunciado pede.
-          Corrija o peso (clique nele) ou use o botão. Depois, passe o mouse num vértice para ver o caminho mínimo até ele.</p>
-      </div>
-      <div class="slide-body"><div class="w-dij" style="display:flex;flex:1;min-height:0"></div></div>
-    </section>
-
-    <!-- 4 · Vetor x heap 3D -->
+    <!-- 3 · Vetor x heap 3D -->
     <section class="slide" data-title="Vetor × heap" data-init="dual" style="--accent:var(--vec)">
       <div class="slide-head">
         <span class="kicker">Duas implementações do Dijkstra</span>
@@ -69,24 +58,23 @@
       <div class="slide-body vh-host"></div>
     </section>
 
-    <!-- 5 · Escala -->
-    <section class="slide" data-title="Escala: n² × (n+m) log n" data-init="theory" style="--accent:var(--vec)">
+    <!-- 4 · Escala -->
+    <section class="slide" data-title="Escala: n² × (n+m) log(n+m)" data-init="theory" style="--accent:var(--vec)">
       <div class="slide-head">
         <span class="kicker">Complexidade nos grafos reais</span>
         <h2>Quando o vetor deixa de ser opção</h2>
-        <p class="lead">Cada grafo do trabalho tem dois pontos: as operações do <b class="c-vec">vetor</b> (n²) e as do <b class="c-dij">heap</b> ((n+m)·log n).
+        <p class="lead">Cada grafo do trabalho tem dois pontos: as operações do <b class="c-vec">vetor</b> (n²) e as do <b class="c-dij">heap</b> ((n+m)·log(n+m): sem o <i>decrease-key</i>, o heap pode guardar uma entrada por aresta).
           Passe o mouse para ver a estimativa de tempo a <b>1 ns por operação</b>. Medido de verdade no W_3 (100 mil vértices, média de várias execuções): <b class="c-dij">0,16 s</b> com heap contra <b class="c-vec">40,7 s</b> com vetor, cerca de <b>260×</b>.</p>
       </div>
       <div class="slide-body grid-2-wide">
         <div class="card">
           <div class="legend theory-legend">
             <span><span class="dot" style="background:var(--vec)"></span>vetor: n² operações</span>
-            <span><span class="dot" style="background:var(--dij)"></span>heap: (n+m)·log n operações</span>
-            <span><span class="dash"></span>curva n²</span>
-            <span><span class="bar"></span>distância entre os dois = quanto o heap economiza</span>
+            <span><span class="dot" style="background:var(--dij)"></span>heap: (n+m)·log(n+m) operações</span>
+            <span><span class="bar"></span>barra = quanto o heap economiza (o número à direita)</span>
           </div>
           <div class="chart theory-chart"></div>
-          <p class="note">Cada grafo do trabalho é uma coluna: o ponto de cima é o vetor e o de baixo é o heap. Os eixos são logarítmicos, então cada linha da grade é 10× mais.</p>
+          <p class="note">Cada linha é um grafo do trabalho, do menor para o maior. Quanto mais longe o ponto amarelo fica do azul, mais o vetor perde.</p>
         </div>
         <div class="card">
           <h3>Estimativa a 1 ns/op</h3>
@@ -95,7 +83,7 @@
       </div>
     </section>
 
-    <!-- 6 · Os grafos -->
+    <!-- 5 · Os grafos -->
     <section class="slide" data-title="Os grafos" data-init="graphs" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Dados</span>
@@ -114,7 +102,7 @@
       </div>
     </section>
 
-    <!-- 7 · Desempenho -->
+    <!-- 6 · Desempenho -->
     <section class="slide" data-title="Quanto custa cada busca" data-init="perf" style="--accent:var(--bfs)">
       <div class="slide-head">
         <span class="kicker">Benchmarks · média de 100 execuções por grafo</span>
@@ -128,17 +116,17 @@
           <div class="chart perf-chart"></div>
         </div>
         <div class="card">
-          <div class="row"><h3 class="strip-title"></h3></div>
+          <div class="row"><select class="sel perf-graph"></select><h3 class="strip-title">as 100 execuções</h3></div>
           <div class="chart strip-chart" style="min-height:200px"></div>
           <div class="stats strip-stats"></div>
         </div>
       </div>
     </section>
 
-    <!-- 8 · Árvores -->
+    <!-- 7 · Árvores -->
     <section class="slide" data-title="A forma de cada busca" data-init="trees" style="--accent:var(--bfs)">
       <div class="slide-head">
-        <span class="kicker">Árvores reais · primeiros 220 vértices visitados a partir do vértice 1</span>
+        <span class="kicker">Árvores reais · primeiros vértices visitados a partir do vértice 1</span>
         <h2>A forma de cada busca</h2>
       </div>
       <div class="slide-body grid-2-wide">
@@ -153,7 +141,8 @@
             <span class="spacer"></span>
             <button class="btn tree-replay"></button>
           </div>
-          <div class="chart tree-chart" style="min-height:380px"></div>
+          <div class="row"><span class="mono muted" style="font-size:12px">vértices por busca</span><input type="range" class="tree-n" min="50" max="1500" step="50" value="200" style="flex:1;accent-color:var(--bfs)"/><span class="mono tree-nv" style="font-size:12px">200</span></div>
+          <div class="chart tree-chart" style="min-height:340px"></div>
           <div class="note">A origem é o ponto branco. Arraste para mover e use a roda do mouse para zoom.</div>
         </div>
         <div class="card">
@@ -164,7 +153,7 @@
       </div>
     </section>
 
-    <!-- 9 · 3D -->
+    <!-- 8 · 3D -->
     <section class="slide" data-title="As árvores em 3D" data-init="gallery" style="--accent:var(--dfs)">
       <div class="slide-head">
         <span class="kicker">BFS × DFS × Dijkstra sobrepostas</span>
@@ -193,7 +182,7 @@
       </div>
     </section>
 
-    <!-- 10 · Estudo 1 -->
+    <!-- 9 · Estudo 1 -->
     <section class="slide" data-title="Estudo 1: distâncias a partir de 10" data-init="e1" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Estudo de caso 1</span>
@@ -203,17 +192,17 @@
       <div class="slide-body e1-body"></div>
     </section>
 
-    <!-- 11 · Estudo 3 -->
+    <!-- 10 · Estudo 3 -->
     <section class="slide" data-title="Estudo 3: rede de colaboração" data-init="e3" style="--accent:var(--bfs)">
       <div class="slide-head">
         <span class="kicker">Estudo de caso 3 · rede de colaboração em Computação</span>
-        <h2>De Edsger W. Dijkstra a…</h2>
-        <p class="lead">O peso de uma aresta é inversamente proporcional ao número de artigos em coautoria: <b>quanto menor, mais próximos</b>. Passe o mouse num pesquisador para destacar o caminho até ele. As abas trazem outros nomes conhecidos, incluindo professores da UFRJ.</p>
+        <h2 class="e3-titulo">De Edsger W. Dijkstra a…</h2>
+        <p class="lead">O peso de uma aresta é inversamente proporcional ao número de artigos em coautoria: <b>quanto menor, mais próximos</b>. Escolha a <b>origem</b> (o enunciado pede Dijkstra; incluímos o Ratton e os dois maiores hubs) e use as abas para trocar os destinos. Passe o mouse num pesquisador para destacar o caminho.</p>
       </div>
       <div class="slide-body e3-body"></div>
     </section>
 
-    <!-- 12 · Obrigado -->
+    <!-- 11 · Obrigado -->
     <section class="slide slide-cover slide-thanks" data-title="Obrigado" data-init="thanks">
       <div class="cover-bg"></div>
       <div class="cover-content">

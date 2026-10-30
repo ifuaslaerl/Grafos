@@ -82,6 +82,9 @@ template <typename T>
 void Grafo<T>::add_edge(int u, int v, T w){
     assert(1 <= u && u <= n);
     assert(1 <= v && v <= n);
+    if(w < T{}){
+        throw invalid_argument("A biblioteca ainda nao implementa caminhos minimos com pesos negativos.");
+    }
 
     adj[u].push_back({u, v, w});
     adj[v].push_back({v, u, w});
@@ -95,6 +98,9 @@ template <typename T>
 void Grafo<T>::add_arc(int u, int v, T w){
     assert(1 <= u && u <= n);
     assert(1 <= v && v <= n);
+    if(w < T{}){
+        throw invalid_argument("A biblioteca ainda nao implementa caminhos minimos com pesos negativos.");
+    }
 
     adj[u].push_back({u, v, w});
     ++grau[u];

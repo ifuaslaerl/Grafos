@@ -158,7 +158,7 @@
         .attr("font-family", "var(--font-mono)").text("Dijkstra÷BFS");
     }
     sized(container, (w, h) => draw(w, h));
-    return { setStat(s) { stat = s; draw(...size); } };
+    return { setStat(s) { stat = s; draw(...size); }, select(id) { sel = id; draw(...size, false); } };
   }
 
   // ------------------------------------ distribuicao das 100 execucoes
@@ -203,7 +203,7 @@
   // ------------------------------------------------- histograma de graus
   function DegreeChart(container) {
     const svg = d3.select(container).append("svg");
-    let gid = null, logY = false, size = [500, 300];
+    let gid = null, logY = false, size = [500, 300], destaques = [];
     function draw(w, h) {
       size = [w, h];
       svg.selectAll("*").remove();
@@ -234,9 +234,21 @@
         svg.append("text").attr("x", x(v) + 5).attr("y", m.t + 10).attr("fill", c).attr("font-size", 11).attr("font-family", "var(--font-mono)").text(label);
       };
       mark(g.graus.medio, `média ${fNum(g.graus.medio, 2)}`, css("--warn"));
+      // vertices de grau muito alto: uma barra de 1 vertice some no grafico, entao ganha um rotulo
+      const dc = css("--dfs");
+      destaques.forEach((d, i) => {
+        const cx = x(d.grau) + bw / 2, base = y(logY ? 1 : 0), top = m.t + 40 + i * 34;
+        svg.append("line").attr("x1", cx).attr("x2", cx).attr("y1", top + 6).attr("y2", base - 8).attr("stroke", dc).attr("stroke-width", 1.5).attr("stroke-dasharray", "2 3");
+        svg.append("circle").attr("cx", cx).attr("cy", base - 4).attr("r", 6).attr("fill", dc).attr("class", "deg-hub");
+        svg.append("text").attr("x", cx - 8).attr("y", top).attr("text-anchor", "end").attr("fill", dc).attr("font-size", 12.5).attr("font-weight", 600).text(d.nome);
+        svg.append("text").attr("x", cx - 8).attr("y", top + 14).attr("text-anchor", "end").attr("fill", css("--muted")).attr("font-size", 11).attr("font-family", "var(--font-mono)").text(`grau ${d.grau}`);
+      });
     }
     sized(container, draw);
-    return { show(id) { gid = id; draw(...size); }, setLog(v) { logY = v; draw(...size); } };
+    return {
+      show(id, marcar = []) { gid = id; destaques = marcar; draw(...size); },
+      setLog(v) { logY = v; draw(...size); },
+    };
   }
 
   // ------------------------------------------------ amostra das arvores
@@ -316,40 +328,40 @@
     };
   }
 
-  // ------------------------------------------- teoria: n^2 x (n+m) log n
+  // ------------------------------------- teoria: n^2 x (n+m) log(n+m)
+  // Uma linha por grafo: o ponto do heap, o do vetor e a barra entre eles.
+  const opsVetor = (g) => g.n * g.n;
+  const opsHeap = (g) => (g.n + g.m) * Math.log2(g.n + g.m);
   function TheoryChart(container) {
     const svg = d3.select(container).append("svg");
-    const pts = DADOS.grafos.map((g) => ({
-      g,
-      vetor: g.n * g.n,
-      heap: (g.n + g.m) * Math.log2(g.n),
-    }));
+    const pts = DADOS.grafos.slice().sort((a, b) => a.n - b.n || a.m - b.m).map((g) => ({ g, vetor: opsVetor(g), heap: opsHeap(g) }));
     function draw(w, h) {
       svg.selectAll("*").remove();
-      const m = { t: 18, r: 20, b: 46, l: 70 };
-      const x = d3.scaleLog().domain([d3.min(pts, (p) => p.g.n) / 2, d3.max(pts, (p) => p.g.n) * 2]).range([m.l, w - m.r]);
-      const y = d3.scaleLog().domain([1e5, 1e15]).range([h - m.b, m.t]);
-      svg.append("g").attr("class", "gridline").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(6).tickSize(-(w - m.l - m.r)).tickFormat(""));
-      svg.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(5, (d) => fBig(d)));
-      svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(6, (d) => `10^${Math.round(Math.log10(d))}`));
-      svg.append("text").attr("class", "axis-label").attr("x", (m.l + w - m.r) / 2).attr("y", h - 8).attr("text-anchor", "middle").text("número de vértices n (log)");
-      svg.append("text").attr("class", "axis-label").attr("transform", `translate(16,${(m.t + h - m.b) / 2}) rotate(-90)`).attr("text-anchor", "middle").text("operações (log)");
+      const m = { t: 8, r: 64, b: 42, l: 140 };
+      const y = d3.scaleBand().domain(pts.map((p) => p.g.nome)).range([m.t, h - m.b]).padding(0.35);
+      const x = d3.scaleLog().domain([1e6, 1e15]).range([m.l, w - m.r]);
+      svg.append("g").attr("class", "gridline").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(9).tickSize(-(h - m.t - m.b)).tickFormat(""));
+      svg.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(9, (d) => `10^${Math.round(Math.log10(d))}`));
+      svg.append("text").attr("class", "axis-label").attr("x", (m.l + w - m.r) / 2).attr("y", h - 6).attr("text-anchor", "middle").text("operações (escala log: cada linha da grade é 10× mais)");
+      svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`)
+        .call(d3.axisLeft(y).tickSize(0))
+        .select(".domain").remove();
 
       const vec = css("--vec"), heap = css("--heap");
-      // curva n^2
-      const ns = d3.range(Math.log10(x.domain()[0]), Math.log10(x.domain()[1]) + 0.01, 0.05).map((e) => 10 ** e);
-      svg.append("path").datum(ns).attr("fill", "none").attr("stroke", vec).attr("stroke-opacity", .35).attr("stroke-dasharray", "5 5")
-        .attr("d", d3.line().x((n) => x(n)).y((n) => y(Math.min(1e15, n * n))));
-      const gp = svg.append("g").selectAll("g").data(pts).join("g");
-      gp.append("line").attr("x1", (p) => x(p.g.n)).attr("x2", (p) => x(p.g.n)).attr("y1", (p) => y(p.heap)).attr("y2", (p) => y(Math.min(1e15, p.vetor)))
-        .attr("stroke", css("--line")).attr("stroke-width", 2);
-      gp.append("circle").attr("cx", (p) => x(p.g.n)).attr("cy", (p) => y(Math.min(1e15, p.vetor))).attr("r", 6).attr("fill", vec);
-      gp.append("circle").attr("cx", (p) => x(p.g.n)).attr("cy", (p) => y(p.heap)).attr("r", 6).attr("fill", heap);
-      gp.on("mousemove", (ev, p) => showTip(ev, `<b>${p.g.nome}</b> · n = ${fInt(p.g.n)}, m = ${fInt(p.g.m)}<br>
+      const gp = svg.append("g").selectAll("g").data(pts).join("g").attr("transform", (p) => `translate(0,${y(p.g.nome) + y.bandwidth() / 2})`);
+      gp.append("line").attr("x1", (p) => x(p.heap)).attr("x2", (p) => x(p.heap)).attr("stroke", css("--line")).attr("stroke-width", 3)
+        .transition().duration(800).delay((p, i) => i * 60).attr("x2", (p) => x(p.vetor));
+      gp.append("circle").attr("cx", (p) => x(p.heap)).attr("r", 6).attr("fill", heap);
+      gp.append("circle").attr("cx", (p) => x(p.heap)).attr("r", 6).attr("fill", vec)
+        .transition().duration(800).delay((p, i) => i * 60).attr("cx", (p) => x(p.vetor));
+      gp.append("text").attr("x", (p) => x(p.vetor) + 10).attr("dy", "0.35em").attr("fill", css("--muted")).attr("font-size", 11).attr("font-family", "var(--font-mono)")
+        .text((p) => `${fInt(Math.round(p.vetor / p.heap))}×`);
+      gp.append("rect").attr("x", m.l).attr("y", -y.step() / 2).attr("width", w - m.l - m.r).attr("height", y.step()).attr("fill", "transparent")
+        .on("mousemove", (ev, p) => showTip(ev, `<b>${p.g.nome}</b> · n = ${fInt(p.g.n)}, m = ${fInt(p.g.m)}<br>
           <span class="c-vec">vetor</span> n² ≈ <b>${p.vetor.toExponential(1)}</b> → ${fDur(p.vetor * 1e-9)} a 1 ns/op<br>
-          <span class="c-dij">heap</span> (n+m)·log n ≈ <b>${p.heap.toExponential(1)}</b> → ${fDur(p.heap * 1e-9)} a 1 ns/op<br>
-          razão ≈ <b>${fInt(Math.round(p.vetor / p.heap))}×</b>`))
-        .on("mouseleave", hideTip).style("cursor", "default");
+          <span class="c-dij">heap</span> (n+m)·log(n+m) ≈ <b>${p.heap.toExponential(1)}</b> → ${fDur(p.heap * 1e-9)} a 1 ns/op<br>
+          o heap faz ≈ <b>${fInt(Math.round(p.vetor / p.heap))}×</b> menos operações`))
+        .on("mouseleave", hideTip);
     }
     sized(container, draw);
   }

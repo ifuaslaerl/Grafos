@@ -67,7 +67,12 @@ int main(int argc, char* argv[]){
             cerr << "Erro: endpoint de aresta fora do intervalo de vertices.\n";
             return 1;
         }
-        graph.add_edge(u, v, weight);
+        try{
+            graph.add_edge(u, v, weight);
+        } catch(const invalid_argument& e){
+            cerr << "Erro: " << e.what() << "\n";
+            return 1;
+        }
     }
 
     if(start < 1 || start > n){

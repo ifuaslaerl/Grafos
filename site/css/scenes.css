@@ -32,7 +32,7 @@
 }
 
 /* ==========================================================
-   Slide 2 · quatro fronteiras
+   Slide 2 · três fronteiras
    ========================================================== */
 .quad-host { min-height: 0; }
 .quad-grid { display: grid; grid-template-columns: minmax(340px, .9fr) minmax(0, 2fr); gap: 16px; flex: 1; min-height: 0; }
@@ -47,6 +47,7 @@
 .rule b { color: var(--text); }
 .rule.on { border-color: var(--alg); background: color-mix(in srgb, var(--alg) 14%, transparent); }
 .quad-panels { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; min-height: 0; }
+.quad-panels .qp:nth-child(3) { grid-column: span 2; }
 .qp { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: var(--radius); border: 1px solid var(--line-soft); border-top: 3px solid var(--alg); background: linear-gradient(180deg, var(--surface), var(--bg-2)); min-height: 0; transition: box-shadow .25s; }
 .qp.popping { box-shadow: 0 0 0 1px var(--alg), 0 0 28px -8px var(--alg); }
 .qp-head { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
@@ -131,6 +132,7 @@
 @media (max-width: 1100px) {
   .quad-grid, .vh-grid { grid-template-columns: 1fr; }
   .quad-panels { grid-template-columns: 1fr; grid-template-rows: none; }
+  .quad-panels .qp:nth-child(3) { grid-column: auto; }
   .qp-canvas { min-height: 220px; }
 }
 .rg-ilha { fill: none; stroke: var(--danger); stroke-opacity: .5; stroke-dasharray: 5 4; }
@@ -140,7 +142,6 @@
 .theory-legend { gap: 8px 18px; font-size: 12.5px; color: var(--text-2); }
 .theory-legend > span { display: inline-flex; align-items: center; gap: 7px; }
 .theory-legend .dot { width: 11px; height: 11px; border-radius: 50%; }
-.theory-legend .dash { width: 22px; border-top: 2px dashed var(--vec); opacity: .6; }
 .theory-legend .bar { width: 3px; height: 14px; background: var(--line); border-radius: 2px; }
 .deg-nota:empty { display: none; }
 
