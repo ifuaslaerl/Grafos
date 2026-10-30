@@ -36,18 +36,7 @@
       </div>
     </section>
 
-    <!-- 2 · Lista de adjacência sendo construída -->
-    <section class="slide" data-title="Lendo o grafo" data-init="lib" style="--accent:var(--dij)">
-      <div class="slide-head">
-        <span class="kicker">Representação</span>
-        <h2>Do arquivo para a lista de adjacência</h2>
-        <p class="lead">Cada linha <code>u v peso</code> vira uma chamada de <code>add_edge</code>. A aresta entra <b>duas vezes</b> na lista, uma em cada ponta, porque o grafo não é direcionado.
-          O tipo do peso é um parâmetro (<code>Grafo&lt;T&gt;</code>) com padrão <code>T{1}</code>, então os grafos sem peso da Parte 1 continuam funcionando.</p>
-      </div>
-      <div class="slide-body lib-host"></div>
-    </section>
-
-    <!-- 3 · Quatro fronteiras -->
+    <!-- 2 · Quatro fronteiras -->
     <section class="slide" data-title="Um algoritmo, quatro fronteiras" data-init="frontier" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Decisão de projeto</span>
@@ -58,7 +47,7 @@
       <div class="slide-body quad-host"></div>
     </section>
 
-    <!-- 4 · Dijkstra -->
+    <!-- 3 · Dijkstra -->
     <section class="slide" data-title="Dijkstra ao vivo" data-init="dijkstra" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Caminho mínimo com pesos</span>
@@ -69,7 +58,7 @@
       <div class="slide-body"><div class="w-dij" style="display:flex;flex:1;min-height:0"></div></div>
     </section>
 
-    <!-- 5 · Vetor x heap 3D -->
+    <!-- 4 · Vetor x heap 3D -->
     <section class="slide" data-title="Vetor × heap" data-init="dual" style="--accent:var(--vec)">
       <div class="slide-head">
         <span class="kicker">Duas implementações do Dijkstra</span>
@@ -80,7 +69,7 @@
       <div class="slide-body vh-host"></div>
     </section>
 
-    <!-- 6 · Escala -->
+    <!-- 5 · Escala -->
     <section class="slide" data-title="Escala: n² × (n+m) log n" data-init="theory" style="--accent:var(--vec)">
       <div class="slide-head">
         <span class="kicker">Complexidade nos grafos reais</span>
@@ -106,7 +95,7 @@
       </div>
     </section>
 
-    <!-- 7 · Os grafos -->
+    <!-- 6 · Os grafos -->
     <section class="slide" data-title="Os grafos" data-init="graphs" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Dados</span>
@@ -125,7 +114,7 @@
       </div>
     </section>
 
-    <!-- 8 · Desempenho -->
+    <!-- 7 · Desempenho -->
     <section class="slide" data-title="Quanto custa cada busca" data-init="perf" style="--accent:var(--bfs)">
       <div class="slide-head">
         <span class="kicker">Benchmarks · média de 100 execuções por grafo</span>
@@ -146,7 +135,7 @@
       </div>
     </section>
 
-    <!-- 9 · Árvores -->
+    <!-- 8 · Árvores -->
     <section class="slide" data-title="A forma de cada busca" data-init="trees" style="--accent:var(--bfs)">
       <div class="slide-head">
         <span class="kicker">Árvores reais · primeiros 220 vértices visitados a partir do vértice 1</span>
@@ -175,7 +164,7 @@
       </div>
     </section>
 
-    <!-- 10 · 3D -->
+    <!-- 9 · 3D -->
     <section class="slide" data-title="As árvores em 3D" data-init="gallery" style="--accent:var(--dfs)">
       <div class="slide-head">
         <span class="kicker">BFS × DFS × Dijkstra sobrepostas</span>
@@ -204,7 +193,7 @@
       </div>
     </section>
 
-    <!-- 11 · Estudo 1 -->
+    <!-- 10 · Estudo 1 -->
     <section class="slide" data-title="Estudo 1: distâncias a partir de 10" data-init="e1" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Estudo de caso 1</span>
@@ -214,7 +203,7 @@
       <div class="slide-body e1-body"></div>
     </section>
 
-    <!-- 12 · Estudo 3 -->
+    <!-- 11 · Estudo 3 -->
     <section class="slide" data-title="Estudo 3: rede de colaboração" data-init="e3" style="--accent:var(--bfs)">
       <div class="slide-head">
         <span class="kicker">Estudo de caso 3 · rede de colaboração em Computação</span>
@@ -224,7 +213,7 @@
       <div class="slide-body e3-body"></div>
     </section>
 
-    <!-- 13 · Obrigado -->
+    <!-- 12 · Obrigado -->
     <section class="slide slide-cover slide-thanks" data-title="Obrigado" data-init="thanks">
       <div class="cover-bg"></div>
       <div class="cover-content">
