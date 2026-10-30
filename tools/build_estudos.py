@@ -93,19 +93,25 @@ def nomes(indices):
 
 
 def estudo3():
-    d = ler("caminhos_rede.json")
-    if d is None or "erro" in d:
+    """Uma entrada por origem: caminhos_rede_<indice>.json (Dijkstra primeiro)."""
+    arquivos = sorted(f for f in os.listdir(ENTRADA) if f.startswith("caminhos_rede_") and f.endswith(".json"))
+    execucoes = [d for d in map(ler, arquivos) if d is not None and "erro" not in d]
+    if not execucoes:
         return None
-    destinos = []
-    sem_caminho = [x["indice"] for x in d["destinos"] if x["caminho"] is None]
-    viz = vizinhos(sem_caminho) if sem_caminho else {}
+    execucoes.sort(key=lambda d: d["origem"] != "Edsger W. Dijkstra")
+    sem_caminho = {x["indice"] for d in execucoes for x in d["destinos"] if x["caminho"] is None}
+    viz = vizinhos(sorted(sem_caminho)) if sem_caminho else {}
     nomes_viz = nomes([v for vs in viz.values() for v in vs])
-    for x in d["destinos"]:
-        item = {"destino": x["destino"], "nome": x["destino"], "distancia": x["distancia"], "caminho": x["caminho"]}
-        if x["caminho"] is None:
-            item["coautores"] = [nomes_viz.get(v, str(v)) for v in viz.get(x["indice"], [])]
-        destinos.append(item)
-    return {"origem": d["origem"], "tempo_s": d["tempo_dijkstra_s"], "n": d["n"], "m": d["m"], "destinos": destinos}
+    origens = []
+    for d in execucoes:
+        destinos = []
+        for x in d["destinos"]:
+            item = {"destino": x["destino"], "distancia": x["distancia"], "caminho": x["caminho"]}
+            if x["caminho"] is None:
+                item["coautores"] = [nomes_viz.get(v, str(v)) for v in viz.get(x["indice"], [])]
+            destinos.append(item)
+        origens.append({"origem": d["origem"], "tempo_s": d["tempo_dijkstra_s"], "destinos": destinos})
+    return {"n": execucoes[0]["n"], "m": execucoes[0]["m"], "origens": origens}
 
 
 def main():
@@ -117,7 +123,7 @@ def main():
         json.dump(dados, f, ensure_ascii=False, separators=(",", ":"))
         f.write(";\n")
     for k, v in dados.items():
-        n = len(v.get("grafos", v.get("destinos", []))) if v else 0
+        n = len(v.get("grafos", v.get("origens", []))) if v else 0
         print(f"  {k}: {'ok (' + str(n) + ')' if v else 'sem dados'}")
     print(f"ok: {destino}")
 

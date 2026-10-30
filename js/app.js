@@ -6,16 +6,19 @@
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   let cur = -1;
 
+  // Os dois vertices de maior grau da rede de colaboracao
+  const GIGANTES = [{ grau: 643, nome: "Wei Wang" }, { grau: 605, nome: "Wei Li" }];
+
   // Estudo 3: grupos de pesquisadores, um grafo por aba
   const GRUPOS_E3 = [
     { label: "Pedidos no enunciado", nomes: ["Alan M. Turing", "J. B. Kruskal", "Jon M. Kleinberg", "Éva Tardos", "Daniel R. Figueiredo"] },
     { label: "Caminhos mínimos", nomes: ["Richard Bellman", "Robert W. Floyd", "Stephen Warshall", "Robert Endre Tarjan", "Leonhard Euler"],
       nota: "Os nomes por trás de Bellman-Ford, Floyd-Warshall e Tarjan. Euler aparece no DBLP, mas sem nenhum coautor." },
-    { label: "Lendas", nomes: ["Donald E. Knuth", "Paul Erdös", "Richard M. Karp", "Claude E. Shannon", "John von Neumann"] },
+    { label: "Lendas", nomes: ["Edsger W. Dijkstra", "Donald E. Knuth", "Paul Erdös", "Richard M. Karp", "Claude E. Shannon", "John von Neumann"] },
     { label: "UFRJ · algoritmos e grafos", nomes: ["Valmir C. Barbosa", "Celina M. Herrera de Figueiredo", "Jayme Luiz Szwarcfiter", "Sulamita Klein", "Fábio Protti", "Nelson Maculan"] },
     { label: "UFRJ · sistemas", nomes: ["Edmundo de Souza e Silva", "Rosa M. M. Leão", "Daniel Sadoc Menasché", "Felipe M. G. França", "Claudio Esperança", "Ricardo Marroquim", "Geraldo Xexéo", "Guilherme Horta Travassos"] },
-    { label: "Grau 643", nomes: ["Wei Wang"],
-      nota: "<b>Wei Wang</b> é o vértice de maior grau da rede, com 643 coautores. Muito provavelmente não é uma pessoa só: os cinco maiores graus são quase todos nomes muito comuns (Wei Wang, Wei Li, Li Zhang, Ian T. Foster, Wei Zhang), e pesquisadores homônimos acabam somados num único vértice." },
+    { label: "Os dois gigantes", nomes: ["Wei Wang", "Wei Li"],
+      nota: "<b>Wei Wang</b> (643 coautores) e <b>Wei Li</b> (605) são os vértices de maior grau da rede. Muito provavelmente nenhum dos dois é uma pessoa só: são nomes muito comuns, e pesquisadores homônimos acabam somados num único vértice. Escolha um deles como origem para ver como ficam perto de todo mundo." },
   ];
 
   // ===================================================================
@@ -30,28 +33,16 @@
 
     frontier(s) { return Scenes.QuadRun(s.querySelector(".quad-host")); },
 
-    dijkstra(s) {
-      const w = AlgoWidget(s.querySelector(".w-dij"), {
-        graph: GraphGen.EXEMPLOS.pdf, alg: "dij-heap", algs: ["dij-heap", "dij-vetor"],
-        presets: [
-          { label: "Figura 1", graph: () => GraphGen.EXEMPLOS.pdf },
-          { label: "Exemplo maior", graph: () => GraphGen.EXEMPLOS.dijkstra },
-          { label: "Aleatório", icon: "dice", graph: () => GraphGen.randomGraph(10, 8, true) },
-        ],
-      });
-      return { leave: w.stop };
-    },
-
     dual(s) { return Scenes.VecHeap3D(s.querySelector(".vh-host")); },
 
     theory(s) {
       Charts.TheoryChart(s.querySelector(".theory-chart"));
       const rows = DADOS.grafos.slice().sort((a, b) => a.n - b.n).map((g) => {
-        const v = g.n * g.n * 1e-9, h = (g.n + g.m) * Math.log2(g.n) * 1e-9;
-        return `<tr><td>${g.nome}</td><td>${fBig(g.n)}</td><td class="c-dij">${fDur(h)}</td><td class="c-vec">${fDur(v)}</td></tr>`;
+        const v = g.n * g.n * 1e-9, h = (g.n + g.m) * Math.log2(g.n + g.m) * 1e-9;
+        return `<tr><td>${g.nome}</td><td>${fBig(g.n)}</td><td>${fBig(g.m)}</td><td class="c-dij">${fDur(h)}</td><td class="c-vec">${fDur(v)}</td></tr>`;
       });
       s.querySelector(".theory-table").innerHTML =
-        `<thead><tr><th>grafo</th><th>n</th><th>heap</th><th>vetor</th></tr></thead><tbody>${rows.join("")}</tbody>`;
+        `<thead><tr><th>grafo</th><th>n</th><th>m</th><th>heap</th><th>vetor</th></tr></thead><tbody>${rows.join("")}</tbody>`;
     },
 
     graphs(s) {
@@ -66,14 +57,15 @@
         const g = G(id);
         tbl.querySelectorAll("tbody tr").forEach((r) => r.classList.toggle("sel", r.dataset.id === id));
         s.querySelector(".deg-title").textContent = `Graus · ${g.nome}`;
-        deg.show(id);
+        deg.show(id, id === "rede_colaboracao" ? GIGANTES : []);
         s.querySelector(".deg-stats").innerHTML = `
           <div class="stat"><span class="v">${g.graus.minimo}</span><span class="l">grau mínimo</span></div>
           <div class="stat"><span class="v">${fInt(g.graus.maximo)}</span><span class="l">grau máximo</span></div>
           <div class="stat"><span class="v">${fNum(g.graus.mediano, 1)}</span><span class="l">mediana</span></div>
           <div class="stat"><span class="v">${fNum((100 * g.componentes.maiores[0]) / g.n, 1)}%</span><span class="l">na maior componente</span></div>`;
         s.querySelector(".deg-nota").innerHTML = id === "rede_colaboracao"
-          ? `Quem tem grau ${fInt(g.graus.maximo)}? É <b>Wei Wang</b>. Muito provavelmente são vários pesquisadores com o mesmo nome somados num vértice só: os cinco maiores graus são quase todos nomes muito comuns (Wei Wang, Wei Li, Li Zhang, Ian T. Foster, Wei Zhang).`
+          ? `<b class="c-dfs">Os dois gigantes</b> ficam bem longe do resto: <b>Wei Wang</b> (grau 643) e <b>Wei Li</b> (605). O próximo tem 477.
+             Muito provavelmente nenhum dos dois é uma pessoa só: são nomes muito comuns, e pesquisadores homônimos acabam somados num vértice. No Estudo 3 dá para usar os dois como origem.`
           : "";
       }
       tbl.querySelectorAll("tbody tr").forEach((r) => r.addEventListener("click", () => pick(r.dataset.id)));
@@ -89,18 +81,21 @@
       const pond = DADOS.grafos.filter((g) => g.ponderado).map(ratio);
       const sem = DADOS.grafos.filter((g) => !g.ponderado).map(ratio);
       s.querySelector(".perf-lead").innerHTML = `<b>Sim, nos grafos com pesos:</b> o Dijkstra levou de <b class="c-warn">${fNum(d3.min(pond), 1)}× a ${fNum(d3.max(pond), 1)}×</b> o tempo da BFS.
-        Cada passo do heap faz comparações em O(log n) e acumula entradas descartadas, enquanto a fila e a pilha fazem O(1).
+        Cada passo do heap faz comparações em O(log(n+m)) e acumula entradas descartadas, enquanto a fila e a pilha fazem O(1).
         Nos grafos <b>sem peso</b> (todo peso = 1) a diferença é pequena: de ${fNum(d3.min(sem), 1)}× a ${fNum(d3.max(sem), 1)}×. A BFS e a DFS praticamente empatam sempre.`;
       const strip = Charts.StripChart(s.querySelector(".strip-chart"));
       function pick(id) {
         const g = G(id);
-        s.querySelector(".strip-title").textContent = `${g.nome} · as 100 execuções`;
+        s.querySelector(".perf-graph").value = id;
         strip.show(id);
         const b = g.benchmark;
         s.querySelector(".strip-stats").innerHTML = Charts.SERIES.map((x) =>
           `<div class="stat"><span class="v" style="color:${x.cor()}">${fMs(b[x.key].media)}</span><span class="l">${x.nome}</span></div>`).join("");
       }
       const chart = Charts.PerfBars(s.querySelector(".perf-chart"), { onSelect: pick, selected: "W_5" });
+      const sel = s.querySelector(".perf-graph");
+      sel.innerHTML = DADOS.grafos.map((g) => `<option value="${g.id}">${g.nome}</option>`).join("");
+      sel.addEventListener("change", () => { chart.select(sel.value); pick(sel.value); });
       s.querySelector(".perf-legend").innerHTML = Charts.SERIES.map((x) => `<button><span class="sw" style="color:${x.cor()}"></span>${x.nome}</button>`).join("");
       s.querySelectorAll(".perf-stat button").forEach((b) => b.addEventListener("click", () => {
         s.querySelectorAll(".perf-stat button").forEach((x) => x.classList.toggle("on", x === b));
@@ -121,7 +116,10 @@
           <div class="stat"><span class="v">${i.filhosRaiz}</span><span class="l">filhos da origem</span></div>
           <div class="stat"><span class="v">${i.folhas}</span><span class="l">folhas (de ${i.total})</span></div>`;
       });
-      const show = () => chart.show(sel.value, alg);
+      const nIn = s.querySelector(".tree-n");
+      const show = () => chart.show(sel.value, alg, +nIn.value);
+      nIn.addEventListener("input", () => { s.querySelector(".tree-nv").textContent = nIn.value; });
+      nIn.addEventListener("change", show);
       const replay = s.querySelector(".tree-replay");
       replay.innerHTML = `${ICON.reset} reproduzir`;
       replay.addEventListener("click", show);
@@ -209,26 +207,32 @@
       const body = s.querySelector(".e3-body");
       const E = window.ESTUDOS && ESTUDOS.estudo3;
       if (!E) return placeholder(body, "estudo3");
-      const porNome = new Map(E.destinos.map((d) => [d.destino, d]));
-      const grupos = GRUPOS_E3.map((g) => ({ ...g, destinos: g.nomes.map((n) => porNome.get(n)).filter(Boolean) })).filter((g) => g.destinos.length);
-      body.innerHTML = `<div class="row"><div class="seg e3-tabs">${grupos.map((g, i) => `<button data-i="${i}" class="${i ? "" : "on"}">${g.label}</button>`).join("")}</div></div>
+      body.innerHTML = `<div class="row"><span class="mono muted" style="font-size:12px">origem</span>
+          <select class="sel e3-origem">${E.origens.map((o, i) => `<option value="${i}">${o.origem}</option>`).join("")}</select>
+          <div class="seg e3-tabs">${GRUPOS_E3.map((g, i) => `<button data-i="${i}" class="${i ? "" : "on"}">${g.label}</button>`).join("")}</div></div>
         <div class="grid-2-wide e3-grid"><div class="card rg-slot" style="padding:8px"></div>
         <div class="card"><p class="note e3-nota"></p><div class="e3-list"></div></div></div>`;
       const semCaminho = (d) => !d.coautores || !d.coautores.length
         ? " Não tem nenhum coautor na rede: é um vértice isolado (grau 0)."
         : ` Na rede, ${d.coautores.length > 1 ? "os coautores são" : "o único coautor é"} <b>${d.coautores.join(", ")}</b>, e ${d.coautores.length > 1 ? "eles" : "os dois"} não se ligam ao resto.`;
-      function show(i) {
-        const g = grupos[i];
+      let origem = 0, grupo = 0;
+      function show() {
+        const o = E.origens[origem];
+        const g = GRUPOS_E3[grupo];
+        const porNome = new Map(o.destinos.map((d) => [d.destino, d]));
+        const destinos = g.nomes.map((n) => porNome.get(n)).filter(Boolean);
+        s.querySelector(".e3-titulo").textContent = `De ${o.origem} a…`;
         // um grafo novo por aba: o ResearchGraph se desenha no container que recebe
         const slot = body.querySelector(".rg-slot");
         slot.innerHTML = `<div class="chart rg"></div>`;
         const host = slot.firstChild;
-        Scenes.ResearchGraph(host, { ...E, destinos: g.destinos });
+        if (destinos.length) Scenes.ResearchGraph(host, { origem: o.origem, destinos });
+        else host.innerHTML = `<p class="note" style="padding:16px">${o.origem} é a própria origem.</p>`;
         const nota = body.querySelector(".e3-nota");
         nota.innerHTML = g.nota || "";
         nota.style.display = g.nota ? "" : "none";
         const list = body.querySelector(".e3-list");
-        list.innerHTML = g.destinos.map((d) => `
+        list.innerHTML = destinos.map((d) => `
           <div class="e3-item" data-n="${d.destino}"><div class="row"><b>${d.destino}</b><span class="spacer"></span>
             <span class="mono c-bfs">${d.distancia == null ? "∞" : fNum(d.distancia, 3)}</span></div>
             ${d.caminho ? `<span class="note">${d.caminho.length - 1} arestas</span>${pathHTML(d.caminho)}` : `<span class="note"><b class="c-danger">Sem caminho:</b> está em outra componente conexa.${semCaminho(d)}</span>`}</div>`).join("");
@@ -239,9 +243,11 @@
       }
       body.querySelectorAll(".e3-tabs button").forEach((b) => b.addEventListener("click", () => {
         body.querySelectorAll(".e3-tabs button").forEach((x) => x.classList.toggle("on", x === b));
-        show(+b.dataset.i);
+        grupo = +b.dataset.i;
+        show();
       }));
-      show(0);
+      body.querySelector(".e3-origem").addEventListener("change", (e) => { origem = +e.target.value; show(); });
+      show();
     },
 
     thanks(s) {

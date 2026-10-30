@@ -103,20 +103,19 @@
   }
 
   // =================================================================
-  // Slide 2: as quatro fronteiras rodando ao mesmo tempo
+  // Slide 2: as tres fronteiras rodando ao mesmo tempo
   // =================================================================
   const QUAD = [
-    { k: "bfs", regra: "sai quem <b>entrou primeiro</b>", estrutura: "Fila" },
-    { k: "dfs", regra: "sai quem <b>entrou por último</b>", estrutura: "Pilha" },
-    { k: "dij-vetor", regra: "sai o <b>mais perto</b>, procurando um por um", estrutura: "Vetor" },
-    { k: "dij-heap", regra: "sai o <b>mais perto</b>, que já está no topo", estrutura: "Heap" },
+    { k: "bfs", nome: "BFS", regra: "sai quem <b>entrou primeiro</b>", estrutura: "Fila" },
+    { k: "dfs", nome: "DFS", regra: "sai quem <b>entrou por último</b>", estrutura: "Pilha" },
+    { k: "dij-heap", nome: "Dijkstra", regra: "sai o <b>mais perto</b> da origem (com vetor ou heap, a ordem é a mesma)", estrutura: "Prioridade" },
   ];
 
   function QuadRun(root) {
     root.innerHTML = `
       <div class="quad-grid">
         <div class="card quad-left">
-          <h3>o mesmo laço para as quatro</h3>
+          <h3>o mesmo laço para as três</h3>
           <pre class="code quad-code">${CODE_LINES.map((l, i) => `<span class="ln" data-l="${i + 1}"><span class="marks">${QUAD.map((x) => `<i class="mk" data-k="${x.k}" style="background:${Engine.ALGS[x.k].cor}"></i>`).join("")}</span>${l}</span>`).join("")}</pre>
           <div class="rules">${QUAD.map((x) => `<div class="rule" data-k="${x.k}" style="--alg:${Engine.ALGS[x.k].cor}">
             <span class="sw" style="color:${Engine.ALGS[x.k].cor}"></span><b>${x.estrutura}</b><span>${x.regra}</span></div>`).join("")}</div>
@@ -130,7 +129,7 @@
         </div>
         <div class="quad-panels">${QUAD.map((x) => `
           <div class="qp" data-k="${x.k}" style="--alg:${Engine.ALGS[x.k].cor}">
-            <div class="qp-head"><b>${Engine.ALGS[x.k].nome}</b><span class="qp-msg"></span></div>
+            <div class="qp-head"><b>${x.nome}</b><span class="qp-msg"></span></div>
             <div class="gw-canvas readonly qp-canvas"></div>
             <div class="qp-fr"><span class="cap">próximo a sair →</span><span class="qp-items"></span></div>
             <div class="qp-ord"><span class="cap">ordem de visita</span><span class="qp-order"></span></div>
@@ -150,7 +149,6 @@
       const it = s.frontier;
       if (x.k === "bfs") return it.map((e) => e.vertex);
       if (x.k === "dfs") return it.slice().reverse().map((e) => e.vertex);
-      if (x.k === "dij-vetor") return it.filter((e) => e.pending).sort((a, b) => a.cost - b.cost || a.vertex - b.vertex).map((e) => `${e.vertex}<small>${Engine.fmt(e.cost)}</small>`);
       return it.slice().sort((a, b) => a.cost - b.cost || a.vertex - b.vertex).map((e) => `${e.vertex}<small>${Engine.fmt(e.cost)}</small>`);
     }
     function render() {
@@ -372,7 +370,18 @@
     let sim = null, adder = null, fitTimer = null, size = [600, 500];
     const COL = { bfs: "--bfs", dfs: "--dfs", dijkstra: "--dij" };
 
-    function show(gid, alg) {
+    // primeiros `limite` vertices visitados: [vertice, pai, dist, ordem]. A amostra com
+    // distancias tem 220; acima disso vem da amostra 3D, que so guarda o pai.
+    function linhas(gid, alg, limite) {
+      const curta = DADOS.arvores[gid][alg];
+      if (limite <= curta.length) return curta.slice(0, limite);
+      const flat = DADOS3D.arvores[gid][alg];
+      const out = [];
+      for (let i = 0; i < Math.min(limite, flat.length / 2); i++) out.push([flat[2 * i], flat[2 * i + 1], i < curta.length ? curta[i][2] : null, i + 1]);
+      return out;
+    }
+
+    function show(gid, alg, limite = 220) {
       clearInterval(adder);
       clearTimeout(fitTimer);
       if (sim) sim.stop();
@@ -380,7 +389,7 @@
       const r = container.getBoundingClientRect();
       if (r.width > 10 && r.height > 10) size = [r.width, r.height];
       const [w, h] = size;
-      const rows = DADOS.arvores[gid][alg];
+      const rows = linhas(gid, alg, limite);
       const col = css(COL[alg]);
       const depth = new Map();
       rows.forEach((r) => depth.set(r[0], r[1] === r[0] ? 0 : (depth.get(r[1]) ?? 0) + 1));
@@ -408,7 +417,7 @@
         .on("tick", draw);
       let i = 0;
       adder = setInterval(() => {
-        for (let b = 0; b < 3 && i < all.length; b++, i++) {
+        for (let b = 0; b < Math.max(3, all.length / 70) && i < all.length; b++, i++) {
           const d = all[i];
           if (d.pai !== d.id) {
             const p = byId.get(d.pai);
@@ -435,7 +444,7 @@
           .attr("x1", (d) => d.source.x).attr("y1", (d) => d.source.y).attr("x2", (d) => d.target.x).attr("y2", (d) => d.target.y);
         nodeG.selectAll("circle").data(nodes, (d) => d.id).join((en) => en.append("circle")
           .attr("r", (d) => (d.depth === 0 ? 8 : 3.4)).attr("fill", (d) => (d.depth === 0 ? "#fff" : color(d.depth)))
-          .on("mousemove", (ev, d) => Charts.showTip(ev, `vértice <b>${fInt(d.id)}</b><br>pai ${fInt(d.pai)} · profundidade ${d.depth}<br>${alg === "dijkstra" ? `dist <b>${fNum(d.dist, 3)}</b> · ` : ""}visita #${d.ordem}`))
+          .on("mousemove", (ev, d) => Charts.showTip(ev, `vértice <b>${fInt(d.id)}</b><br>pai ${fInt(d.pai)} · profundidade ${d.depth}<br>${alg === "dijkstra" && d.dist != null ? `dist <b>${fNum(d.dist, 3)}</b> · ` : ""}visita #${d.ordem}`))
           .on("mouseleave", Charts.hideTip))
           .attr("cx", (d) => d.x).attr("cy", (d) => d.y);
       }
@@ -567,7 +576,7 @@
       ilhaN.forEach((d, j) => { d.fx = w * 0.66 + j * 110; d.fy = h - 40; });
       if (ilhaN.length) {
         svg.append("rect").attr("class", "rg-ilha").attr("x", w * 0.66 - 60).attr("y", h - 78).attr("width", 110 * (ilhaN.length - 1) + 200).attr("height", 64).attr("rx", 10);
-        svg.append("text").attr("class", "rg-ilha-t").attr("x", w * 0.66 - 56).attr("y", h - 86).text("outra componente: sem caminho a partir de Dijkstra");
+        svg.append("text").attr("class", "rg-ilha-t").attr("x", w * 0.66 - 56).attr("y", h - 86).text("outra componente conexa: sem caminho");
       }
       sim = d3.forceSimulation(N)
         .force("link", d3.forceLink(L).id((d) => d.id).distance(40).strength(0.25))

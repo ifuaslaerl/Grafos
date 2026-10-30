@@ -30,7 +30,7 @@
   const FRONTIER_INFO = {
     bfs: "<b>Fila</b> (FIFO). <code>process</code>: se o vértice ainda não tem pai, define pai e nível = nível do pai + 1. <code>explore</code>: enfileira vizinhos sem pai.",
     dfs: "<b>Pilha</b> (LIFO). Mesmo <code>process</code>/<code>explore</code> da BFS; só a ordem de saída muda e a busca mergulha fundo.",
-    "dij-heap": "<b>Heap binário</b>. <code>pop</code> em O(log n). <code>explore</code> relaxa e insere uma nova entrada; <code>process</code> descarta entradas obsoletas (custo ≠ dist).",
+    "dij-heap": "<b>Heap binário</b>. <code>pop</code> em O(log(n+m)), porque o heap guarda até uma entrada por aresta relaxada. <code>explore</code> relaxa e insere uma nova entrada; <code>process</code> descarta entradas obsoletas (custo ≠ dist).",
     "dij-vetor": "<b>Vetor de estimativas</b>. <code>pop</code> varre os n vértices: O(n). <code>explore</code> relaxa e sobrescreve a estimativa no lugar, sem duplicatas.",
   };
 
