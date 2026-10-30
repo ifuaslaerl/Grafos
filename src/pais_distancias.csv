@@ -1,0 +1,7 @@
+grafo;pai10_bfs(origem1);pai10_dfs(origem1);pai20_bfs(origem2);pai20_dfs(origem2);pai30_bfs(origem3);pai30_dfs(origem3);dist(10,20);dist(10,30);dist(20,30)
+grafo_1;2042;3075;7541;9429;5783;6071;3;3;4
+grafo_2;inalcancavel;inalcancavel;inalcancavel;inalcancavel;18855;32621;inalcancavel;inalcancavel;3
+grafo_3;inalcancavel;inalcancavel;75471;141526;inalcancavel;inalcancavel;9;inalcancavel;inalcancavel
+grafo_4;194465;272292;inalcancavel;inalcancavel;inalcancavel;inalcancavel;4;3;4
+grafo_5;1888350;905955;inalcancavel;inalcancavel;191713;2502539;inalcancavel;9;inalcancavel
+grafo_6;inalcancavel;inalcancavel;4095628;623747;inalcancavel;inalcancavel;5;5;5

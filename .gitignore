@@ -95,3 +95,9 @@ __pycache__/
 /export_graus
 /export_memoria
 /test_graph
+
+# Dados brutos (CSVs/PNGs grandes gerados pelos exportadores)
+/Dados/
+
+# Grafos de entrada da disciplina (ate 700 MB cada, acima do limite do GitHub)
+/src/testes/

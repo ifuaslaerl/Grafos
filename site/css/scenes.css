@@ -1,0 +1,167 @@
+/* Estilos das cenas animadas (js/scenes.js) e dos estudos de caso. */
+
+/* ==========================================================
+   Entrada animada dos slides
+   ========================================================== */
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.slide.is-active .slide-head > * { animation: rise .55s cubic-bezier(.2, .7, .2, 1) both; }
+.slide.is-active .slide-head > :nth-child(2) { animation-delay: .06s; }
+.slide.is-active .slide-head > :nth-child(3) { animation-delay: .12s; }
+.slide.is-active .slide-body .card { animation: rise .6s cubic-bezier(.2, .7, .2, 1) both; animation-delay: .18s; }
+.slide.is-active .slide-body .card:nth-child(2) { animation-delay: .28s; }
+.slide.is-active .slide-body .card:nth-child(3) { animation-delay: .38s; }
+.slide.is-active .cover-content > * { animation: rise .8s cubic-bezier(.2, .7, .2, 1) both; }
+.slide.is-active .cover-content > :nth-child(2) { animation-delay: .12s; }
+.slide.is-active .cover-content > :nth-child(3) { animation-delay: .24s; }
+.slide.is-active .cover-content > :nth-child(4) { animation-delay: .36s; }
+.slide.is-active .takeaway { animation: rise .6s cubic-bezier(.2, .7, .2, 1) both; }
+.slide.is-active .takeaway:nth-child(2) { animation-delay: .1s; }
+.slide.is-active .takeaway:nth-child(3) { animation-delay: .2s; }
+.slide.is-active .takeaway:nth-child(4) { animation-delay: .3s; }
+.slide.is-active .takeaway:nth-child(5) { animation-delay: .4s; }
+
+.cover-bg { opacity: .9; -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.12) 0%, rgba(0,0,0,.25) 35%, #000 70%); mask-image: linear-gradient(90deg, rgba(0,0,0,.12) 0%, rgba(0,0,0,.25) 35%, #000 70%); }
+.cover-bg canvas { display: block; }
+.cover-content { pointer-events: none; }
+.cover-content > * { pointer-events: auto; }
+.slide-cover .cover-content h1 { text-shadow: 0 4px 40px rgba(0, 0, 0, .8); }
+.slide-cover .lead { text-shadow: 0 2px 18px rgba(0, 0, 0, .9); }
+
+@media (prefers-reduced-motion: reduce) {
+  .slide.is-active * { animation: none !important; }
+}
+
+/* ==========================================================
+   Slide 2 · construindo a lista
+   ========================================================== */
+.lib-host { min-height: 0; }
+.lib-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; flex: 1; min-height: 0; }
+.file-lines { font-family: var(--font-mono); font-size: 13.5px; background: #0d1017; border: 1px solid var(--line-soft); border-radius: var(--radius-sm); padding: 8px 0; }
+.fl { padding: 2px 12px; border-left: 3px solid transparent; color: var(--faint); transition: background .3s, color .3s, border-color .3s; }
+.fl .ln-n { display: inline-block; width: 22px; color: var(--faint); opacity: .6; }
+.fl.done { color: var(--text-2); }
+.fl.on { color: var(--text); background: color-mix(in srgb, var(--dij) 16%, transparent); border-left-color: var(--dij); }
+.lib-code { --alg: var(--dij); }
+.lib-adj { font-family: var(--font-mono); font-size: 13px; display: flex; flex-direction: column; gap: 4px; overflow: auto; }
+.adj-row .cell.fresh { animation: cell-in .7s cubic-bezier(.2, .9, .3, 1.4); border-color: var(--dij); color: var(--text); background: color-mix(in srgb, var(--dij) 22%, var(--surface-2)); }
+@keyframes cell-in { from { opacity: 0; transform: translateX(-14px) scale(.7); } }
+
+/* ==========================================================
+   Slide 3 · quatro fronteiras
+   ========================================================== */
+.quad-host { min-height: 0; }
+.quad-grid { display: grid; grid-template-columns: minmax(340px, .9fr) minmax(0, 2fr); gap: 16px; flex: 1; min-height: 0; }
+.quad-code { font-size: 11.5px; }
+.quad-code .ln { white-space: pre-wrap; padding-left: 52px; text-indent: -48px; }
+
+.marks { display: inline-flex; gap: 2px; width: 44px; vertical-align: middle; }
+.mk { width: 9px; height: 9px; border-radius: 50%; opacity: .08; transition: opacity .2s, transform .2s; }
+.mk.on { opacity: 1; transform: scale(1.25); box-shadow: 0 0 8px rgba(255, 255, 255, .35); }
+.rules { display: flex; flex-direction: column; gap: 6px; }
+.rule { display: grid; grid-template-columns: 14px 64px 1fr; gap: 8px; align-items: center; font-size: 13.5px; color: var(--text-2); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line-soft); transition: background .25s, border-color .25s; }
+.rule b { color: var(--text); }
+.rule.on { border-color: var(--alg); background: color-mix(in srgb, var(--alg) 14%, transparent); }
+.quad-panels { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; min-height: 0; }
+.qp { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: var(--radius); border: 1px solid var(--line-soft); border-top: 3px solid var(--alg); background: linear-gradient(180deg, var(--surface), var(--bg-2)); min-height: 0; transition: box-shadow .25s; }
+.qp.popping { box-shadow: 0 0 0 1px var(--alg), 0 0 28px -8px var(--alg); }
+.qp-head { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+.qp-head b { color: var(--alg); }
+.qp-msg { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.qp-canvas { flex: 1; min-height: 150px; }
+.qp-fr, .qp-ord { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-family: var(--font-mono); font-size: 12px; min-height: 26px; }
+.qp .cap { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.qp-items { display: flex; gap: 4px; flex-wrap: wrap; }
+.qp-items .chip { padding: 1px 7px; font-size: 12px; animation: chip-in .3s ease; }
+.qp-order { color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; text-align: left; flex: 1; min-width: 0; }
+
+/* ==========================================================
+   Slide 5 · vetor x heap em 3D
+   ========================================================== */
+.vh-host { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.vh-host > .row { flex-wrap: wrap; }
+.vh-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; flex: 1; min-height: 0; }
+.vh-3d-card { position: relative; padding: 0; overflow: hidden; min-height: 380px; background: radial-gradient(600px 400px at 50% 45%, rgba(122, 162, 255, .10), transparent 70%), var(--bg-2); }
+.vh-3d { position: absolute; inset: 0; }
+.vh-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.vh-labels span { position: absolute; left: 0; top: 0; font-family: var(--font-mono); font-size: 11px; color: var(--text); margin: -22px 0 0 6px; text-shadow: 0 1px 4px #000, 0 0 2px #000; will-change: transform; }
+.vh-legend { position: absolute; left: 12px; top: 10px; display: flex; flex-wrap: wrap; gap: 10px; font-size: 11.5px; color: var(--text-2); pointer-events: none; }
+.vh-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+.vh-caption { position: absolute; left: 12px; bottom: 10px; font-size: 12.5px; color: var(--text-2); pointer-events: none; background: rgba(11, 13, 18, .7); padding: 4px 10px; border-radius: 6px; }
+.vh-caption b { color: #fff; }
+.vh-side { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: auto; }
+.vh-side .card { padding: 12px 14px; gap: 8px; }
+.vec-strip { display: flex; flex-wrap: wrap; gap: 3px; font-family: var(--font-mono); }
+.vs { display: inline-flex; flex-direction: column; align-items: center; min-width: 34px; padding: 2px 3px; border-radius: 5px; font-size: 10.5px; color: var(--faint); background: var(--bg-2); border: 1px solid var(--line-soft); }
+.vs i { font-style: normal; font-size: 9.5px; opacity: .7; }
+.vs.p { color: var(--text-2); border-color: var(--line); }
+.vs.min { color: #111; background: var(--vec); border-color: var(--vec); font-weight: 600; }
+.vec-strip.scan .vs:not(.min) { animation: vs-scan .45s ease both; animation-delay: var(--d); }
+@keyframes vs-scan { 35% { background: color-mix(in srgb, var(--vec) 55%, transparent); color: #fff; } }
+.vh-heap { min-height: 60px; }
+.race { display: flex; flex-direction: column; gap: 8px; }
+.race-row { display: grid; grid-template-columns: 44px 1fr 64px; gap: 8px; align-items: center; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.race-row b { text-align: right; font-size: 14px; }
+.race-track { height: 12px; border-radius: 6px; background: var(--bg-2); border: 1px solid var(--line-soft); overflow: hidden; }
+.race-fill { height: 100%; width: 0; border-radius: 6px; transition: width .6s cubic-bezier(.2, .7, .2, 1); }
+
+/* ==========================================================
+   Slide 9 · forma das árvores
+   ========================================================== */
+.tree-chart { overflow: hidden; border-radius: var(--radius-sm); background: radial-gradient(500px 300px at 50% 50%, rgba(255, 255, 255, .03), transparent 70%); cursor: grab; }
+.tree-chart:active { cursor: grabbing; }
+.explica p { margin: 0; color: var(--text-2); line-height: 1.65; font-size: 15px; }
+.explica b { color: var(--text); }
+
+/* ==========================================================
+   Slide 10 · explorador 3D
+   ========================================================== */
+.x3d { position: absolute; inset: 0; background: radial-gradient(700px 500px at 50% 45%, rgba(255, 61, 139, .07), transparent 70%), var(--bg-2); }
+.x3d-body > .card:first-child { min-height: 420px; }
+.gallery-wrap { position: absolute; inset: 0; }
+.x3d-body .seg { flex-wrap: wrap; }
+
+/* ==========================================================
+   Estudos de caso
+   ========================================================== */
+.e1-body, .e3-body { min-height: 0; }
+.e1-tabs, .e3-tabs { flex-wrap: wrap; }
+.rg-slot { display: flex; flex-direction: column; }
+.rg-slot .rg { flex: 1; }
+.e3-nota { margin: 0 0 10px; color: var(--text-2); }
+.e1-chart { min-height: 260px; }
+.path .pv, .path .arr { animation: rise .35s ease both; animation-delay: calc(var(--i, 0) * 45ms); }
+.e3-list { display: flex; flex-direction: column; gap: 10px; overflow: auto; }
+.e3-item { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--line-soft); transition: border-color .2s, background .2s; cursor: default; }
+.e3-item:hover { border-color: var(--bfs); background: color-mix(in srgb, var(--bfs) 7%, transparent); }
+.rg { min-height: 420px; }
+.rg-link { stroke: var(--line); stroke-width: 2; transition: stroke .2s, opacity .2s; }
+.rg-link.hl { stroke: var(--bfs); stroke-width: 3.5; }
+.rg-link.dim { opacity: .2; }
+.rg-node circle { fill: var(--surface-3); stroke: var(--muted); stroke-width: 1.5; }
+.rg-node.origem circle { fill: #fff; stroke: var(--dij); stroke-width: 3; }
+.rg-node.alvo circle { fill: var(--bfs); stroke: #fff; stroke-width: 1.5; }
+.rg-node text { fill: var(--text-2); font-size: 10.5px; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+.rg-node.origem text, .rg-node.alvo text { fill: var(--text); font-weight: 600; font-size: 13px; }
+
+@media (max-width: 1100px) {
+  .lib-grid, .quad-grid, .vh-grid { grid-template-columns: 1fr; }
+  .quad-panels { grid-template-columns: 1fr; grid-template-rows: none; }
+  .qp-canvas { min-height: 220px; }
+}
+.rg-ilha { fill: none; stroke: var(--danger); stroke-opacity: .5; stroke-dasharray: 5 4; }
+.rg-ilha-t { fill: var(--danger); font-size: 11px; font-family: var(--font-mono); opacity: .85; }
+
+/* legenda do grafico de complexidade */
+.theory-legend { gap: 8px 18px; font-size: 12.5px; color: var(--text-2); }
+.theory-legend > span { display: inline-flex; align-items: center; gap: 7px; }
+.theory-legend .dot { width: 11px; height: 11px; border-radius: 50%; }
+.theory-legend .dash { width: 22px; border-top: 2px dashed var(--vec); opacity: .6; }
+.theory-legend .bar { width: 3px; height: 14px; background: var(--line); border-radius: 2px; }
+.deg-nota:empty { display: none; }
+
+/* slide final */
+.slide-thanks { align-items: center; }
+.slide-thanks .cover-content { align-items: center; text-align: center; }
+.slide-thanks .cover-content h1 { font-size: clamp(56px, 9vw, 120px); }
+.slide-thanks .lead { font-size: clamp(22px, 2.6vw, 34px); color: var(--text-2); }
+.slide-thanks .cover-bg { -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,.25) 0%, #000 70%); mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,.25) 0%, #000 70%); }
