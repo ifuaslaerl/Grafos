@@ -113,7 +113,7 @@
         <div class="card">
           <h3>arquivo de entrada</h3>
           <div class="file-lines">${linhas.map((l, i) => `<div class="fl" data-i="${i}"><span class="ln-n">${i + 1}</span>${l}</div>`).join("")}</div>
-          <pre class="code lib-code"><span class="ln"><span class="tok-k">void</span> <span class="tok-f">add_edge</span>(<span class="tok-k">int</span> u, <span class="tok-k">int</span> v, <span class="tok-t">T</span> w) {</span><span class="ln l-u">  adj[u].push_back({u, v, w});</span><span class="ln l-v">  adj[v].push_back({v, u, w});</span><span class="ln">  ++grau[u]; ++grau[v]; ++m;</span><span class="ln">}</span></pre>
+          <pre class="code lib-code"><span class="ln"><span class="tok-k">void</span> <span class="tok-f">add_edge</span>(<span class="tok-k">int</span> u, <span class="tok-k">int</span> v, <span class="tok-t">T</span> w) {</span><span class="ln l-u">  adj[u].push_back({v, w});</span><span class="ln l-v">  adj[v].push_back({u, w});</span><span class="ln">  ++grau[u]; ++grau[v]; ++m;</span><span class="ln">}</span></pre>
           <div class="row">
             <button class="btn primary b-play">${ICON.play} construir</button>
             <button class="btn b-step">${ICON.next} passo</button>
@@ -177,37 +177,7 @@
   }
 
   // =================================================================
-  // Slide 3 (complemento): matriz esparsa acendendo celulas
-  // =================================================================
-  function SparseGrid(root) {
-    const n = 28;
-    root.innerHTML = `<svg class="sparse" viewBox="0 0 ${n * 12} ${n * 12}"></svg><div class="note sparse-note"></div>`;
-    const svg = d3.select(root.querySelector("svg"));
-    const cells = [];
-    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) cells.push({ i, j });
-    const rects = svg.selectAll("rect").data(cells).join("rect")
-      .attr("x", (d) => d.j * 12 + 1).attr("y", (d) => d.i * 12 + 1).attr("width", 10).attr("height", 10).attr("rx", 2)
-      .attr("class", "sc");
-    let timer = null, on = new Set(), m = 0;
-    function reset() { on = new Set(); m = 0; rects.classed("on", false).classed("diag", (d) => d.i === d.j); note(); }
-    function note() {
-      root.querySelector(".sparse-note").innerHTML = `${n} vértices, <b>${m}</b> arestas: só <b>${2 * m}</b> de <b>${n * n}</b> células usadas (${fNum((200 * m) / (n * n), 1)}%). O resto da matriz guarda zeros.`;
-    }
-    function add() {
-      if (m >= n * 1.5) { clearInterval(timer); timer = setTimeout(() => { reset(); start(); }, 2600); return; }
-      let u, v;
-      do { u = Math.floor(Math.random() * n); v = Math.floor(Math.random() * n); } while (u === v || on.has(`${u},${v}`));
-      on.add(`${u},${v}`); on.add(`${v},${u}`); m++;
-      rects.filter((d) => (d.i === u && d.j === v) || (d.i === v && d.j === u)).classed("on", true);
-      note();
-    }
-    function start() { clearInterval(timer); timer = setInterval(add, 120); }
-    reset();
-    return { enter() { reset(); start(); }, leave() { clearInterval(timer); clearTimeout(timer); } };
-  }
-
-  // =================================================================
-  // Slide 6: as quatro fronteiras rodando ao mesmo tempo
+  // Slide 3: as quatro fronteiras rodando ao mesmo tempo
   // =================================================================
   const QUAD = [
     { k: "bfs", regra: "sai quem <b>entrou primeiro</b>", estrutura: "Fila" },
@@ -296,7 +266,7 @@
   }
 
   // =================================================================
-  // Slide 8: vetor x heap com o grafo em 3D girando
+  // Slide 5: vetor x heap com o grafo em 3D girando
   // =================================================================
   function heapTree(items, dist, rootEntry) {
     if (!items.length) return `<div class="chips"><span class="empty">vazio</span></div>`;
@@ -460,7 +430,7 @@
   }
 
   // =================================================================
-  // Slide 12: arvore real crescendo por layout de forca
+  // Slide 9: arvore real crescendo por layout de forca
   // =================================================================
   const EXPLICA = {
     bfs: (i) => `<p><b class="c-bfs">BFS · fila.</b> Sai quem entrou primeiro. Ao visitar a origem, <b>todos os ${i.filhosRaiz} vizinhos</b> entram na fila antes de qualquer outro vértice,
@@ -552,7 +522,7 @@
   }
 
   // =================================================================
-  // Slide 13: explorador 3D das arvores reais (BFS + DFS + Dijkstra)
+  // Slide 10: explorador 3D das arvores reais (BFS + DFS + Dijkstra)
   // =================================================================
   function Explorer3D(container, onStats) {
     if (!has3D) {
@@ -705,5 +675,5 @@
     }).observe(container);
   }
 
-  window.Scenes = { Cover3D, LibBuild, SparseGrid, QuadRun, VecHeap3D, ForceTree, Explorer3D, ResearchGraph, EXPLICA, has3D };
+  window.Scenes = { Cover3D, LibBuild, QuadRun, VecHeap3D, ForceTree, Explorer3D, ResearchGraph, EXPLICA, has3D };
 })();

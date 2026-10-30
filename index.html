@@ -47,61 +47,7 @@
       <div class="slide-body lib-host"></div>
     </section>
 
-    <!-- 3 · Memória -->
-    <section class="slide" data-title="Lista × matriz" data-init="mem" style="--accent:var(--vec)">
-      <div class="slide-head">
-        <span class="kicker">Memória</span>
-        <h2>Por que lista de adjacência?</h2>
-        <p class="lead">A matriz reserva <b>n²</b> células, mesmo que quase todas fiquem vazias. Guardar cada célula em 1 bit (<code>vector&lt;bool&gt;</code>/bitset) deixa a matriz 32× menor,
-          mas ela <b>continua sendo n²</b>. A lista guarda só as <b>2m</b> arestas que existem.</p>
-      </div>
-      <div class="slide-body grid-2-wide" style="align-items:start">
-        <div class="card">
-          <div class="row">
-            <select class="sel mem-graph"></select>
-            <div class="seg mem-type">
-              <button data-t="int">int</button><button data-t="double">double</button><button data-t="long double" class="on">long double</button>
-            </div>
-          </div>
-          <div class="row mem-custom" style="display:none">
-            <span class="mono muted" style="font-size:12px;min-width:84px">n = <b class="mn"></b></span>
-            <input type="range" class="big mem-n" min="2" max="8" step="0.01" value="5" />
-          </div>
-          <div class="mem-bars"></div>
-          <div class="note"><span style="color:var(--warn)">▍</span> linha amarela = 16 GB de RAM · escala logarítmica de 1 KB a 1 EB</div>
-          <div class="mem-verdict"></div>
-        </div>
-        <div class="card">
-          <h3>Grafos reais são esparsos</h3>
-          <div class="sparse-host"></div>
-          <div class="stats mem-stats"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4 · BFS -->
-    <section class="slide" data-title="BFS ao vivo" data-init="bfs" style="--accent:var(--bfs)">
-      <div class="slide-head">
-        <span class="kicker">Busca em largura</span>
-        <h2>BFS: camada por camada</h2>
-        <p class="lead">A <b>fila</b> faz todos os vértices a distância k saírem antes dos que estão a distância k+1. Por isso a BFS encontra o <b>menor número de arestas</b> até cada vértice.
-          Experimente formatos diferentes: na <b>grade</b> ela avança como uma onda, e no <b>ciclo</b> ela anda nos dois sentidos ao mesmo tempo.</p>
-      </div>
-      <div class="slide-body"><div class="w-bfs" style="display:flex;flex:1;min-height:0"></div></div>
-    </section>
-
-    <!-- 5 · DFS -->
-    <section class="slide" data-title="DFS ao vivo" data-init="dfs" style="--accent:var(--dfs)">
-      <div class="slide-head">
-        <span class="kicker">Busca em profundidade</span>
-        <h2>DFS: mergulhar primeiro</h2>
-        <p class="lead">Trocando a fila por uma <b>pilha</b>, o mesmo laço segue um caminho até o fim antes de voltar. Na <b>grade</b> ela faz uma "cobrinha", e no <b>ciclo</b> dá a volta inteira para um lado só.
-          É <b>iterativa</b>, então não estoura a pilha de recursão com milhões de vértices.</p>
-      </div>
-      <div class="slide-body"><div class="w-dfs" style="display:flex;flex:1;min-height:0"></div></div>
-    </section>
-
-    <!-- 6 · Quatro fronteiras -->
+    <!-- 3 · Quatro fronteiras -->
     <section class="slide" data-title="Um algoritmo, quatro fronteiras" data-init="frontier" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Decisão de projeto</span>
@@ -112,7 +58,7 @@
       <div class="slide-body quad-host"></div>
     </section>
 
-    <!-- 7 · Dijkstra -->
+    <!-- 4 · Dijkstra -->
     <section class="slide" data-title="Dijkstra ao vivo" data-init="dijkstra" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Caminho mínimo com pesos</span>
@@ -123,7 +69,7 @@
       <div class="slide-body"><div class="w-dij" style="display:flex;flex:1;min-height:0"></div></div>
     </section>
 
-    <!-- 8 · Vetor x heap 3D -->
+    <!-- 5 · Vetor x heap 3D -->
     <section class="slide" data-title="Vetor × heap" data-init="dual" style="--accent:var(--vec)">
       <div class="slide-head">
         <span class="kicker">Duas implementações do Dijkstra</span>
@@ -134,16 +80,25 @@
       <div class="slide-body vh-host"></div>
     </section>
 
-    <!-- 9 · Escala -->
+    <!-- 6 · Escala -->
     <section class="slide" data-title="Escala: n² × (n+m) log n" data-init="theory" style="--accent:var(--vec)">
       <div class="slide-head">
         <span class="kicker">Complexidade nos grafos reais</span>
         <h2>Quando o vetor deixa de ser opção</h2>
         <p class="lead">Cada grafo do trabalho tem dois pontos: as operações do <b class="c-vec">vetor</b> (n²) e as do <b class="c-dij">heap</b> ((n+m)·log n).
-          Passe o mouse para ver a estimativa de tempo a <b>1 ns por operação</b>. O Estudo de Caso 2 traz a medição real.</p>
+          Passe o mouse para ver a estimativa de tempo a <b>1 ns por operação</b>. Medido de verdade no W_3 (100 mil vértices, média de várias execuções): <b class="c-dij">0,16 s</b> com heap contra <b class="c-vec">40,7 s</b> com vetor, cerca de <b>260×</b>.</p>
       </div>
       <div class="slide-body grid-2-wide">
-        <div class="card"><div class="chart theory-chart"></div></div>
+        <div class="card">
+          <div class="legend theory-legend">
+            <span><span class="dot" style="background:var(--vec)"></span>vetor: n² operações</span>
+            <span><span class="dot" style="background:var(--dij)"></span>heap: (n+m)·log n operações</span>
+            <span><span class="dash"></span>curva n²</span>
+            <span><span class="bar"></span>distância entre os dois = quanto o heap economiza</span>
+          </div>
+          <div class="chart theory-chart"></div>
+          <p class="note">Cada grafo do trabalho é uma coluna: o ponto de cima é o vetor e o de baixo é o heap. Os eixos são logarítmicos, então cada linha da grade é 10× mais.</p>
+        </div>
         <div class="card">
           <h3>Estimativa a 1 ns/op</h3>
           <div class="table-wrap"><table class="dtable theory-table"></table></div>
@@ -151,7 +106,7 @@
       </div>
     </section>
 
-    <!-- 10 · Os grafos -->
+    <!-- 7 · Os grafos -->
     <section class="slide" data-title="Os grafos" data-init="graphs" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Dados</span>
@@ -165,11 +120,12 @@
             <div class="seg deg-scale"><button data-s="lin" class="on">linear</button><button data-s="log">log</button></div></div>
           <div class="chart deg-chart"></div>
           <div class="stats deg-stats"></div>
+          <p class="note deg-nota"></p>
         </div>
       </div>
     </section>
 
-    <!-- 11 · Desempenho -->
+    <!-- 8 · Desempenho -->
     <section class="slide" data-title="Quanto custa cada busca" data-init="perf" style="--accent:var(--bfs)">
       <div class="slide-head">
         <span class="kicker">Benchmarks · média de 100 execuções por grafo</span>
@@ -190,7 +146,7 @@
       </div>
     </section>
 
-    <!-- 12 · Árvores -->
+    <!-- 9 · Árvores -->
     <section class="slide" data-title="A forma de cada busca" data-init="trees" style="--accent:var(--bfs)">
       <div class="slide-head">
         <span class="kicker">Árvores reais · primeiros 220 vértices visitados a partir do vértice 1</span>
@@ -219,7 +175,7 @@
       </div>
     </section>
 
-    <!-- 13 · 3D -->
+    <!-- 10 · 3D -->
     <section class="slide" data-title="As árvores em 3D" data-init="gallery" style="--accent:var(--dfs)">
       <div class="slide-head">
         <span class="kicker">BFS × DFS × Dijkstra sobrepostas</span>
@@ -248,7 +204,7 @@
       </div>
     </section>
 
-    <!-- 14 · Estudo 1 -->
+    <!-- 11 · Estudo 1 -->
     <section class="slide" data-title="Estudo 1: distâncias a partir de 10" data-init="e1" style="--accent:var(--dij)">
       <div class="slide-head">
         <span class="kicker">Estudo de caso 1</span>
@@ -258,34 +214,26 @@
       <div class="slide-body e1-body"></div>
     </section>
 
-    <!-- 15 · Estudo 2 -->
-    <section class="slide" data-title="Estudo 2: vetor × heap medido" data-init="e2" style="--accent:var(--vec)">
-      <div class="slide-head">
-        <span class="kicker">Estudo de caso 2</span>
-        <h2>Tempo médio: Dijkstra com vetor × com heap</h2>
-        <p class="lead e2-lead">Sorteamos vértices iniciais, medimos cada execução e tiramos a média.</p>
-      </div>
-      <div class="slide-body e2-body"></div>
-    </section>
-
-    <!-- 16 · Estudo 3 -->
+    <!-- 12 · Estudo 3 -->
     <section class="slide" data-title="Estudo 3: rede de colaboração" data-init="e3" style="--accent:var(--bfs)">
       <div class="slide-head">
         <span class="kicker">Estudo de caso 3 · rede de colaboração em Computação</span>
         <h2>De Edsger W. Dijkstra a…</h2>
-        <p class="lead">O peso de uma aresta é inversamente proporcional ao número de artigos em coautoria: <b>quanto menor, mais próximos</b>. Passe o mouse num pesquisador para destacar o caminho até ele.</p>
+        <p class="lead">O peso de uma aresta é inversamente proporcional ao número de artigos em coautoria: <b>quanto menor, mais próximos</b>. Passe o mouse num pesquisador para destacar o caminho até ele. As abas trazem outros nomes conhecidos, incluindo professores da UFRJ.</p>
       </div>
       <div class="slide-body e3-body"></div>
     </section>
 
-    <!-- 17 · Conclusões -->
-    <section class="slide" data-title="Conclusões" data-init="end" style="--accent:var(--ok)">
-      <div class="slide-head">
-        <span class="kicker">Para levar</span>
-        <h2>Conclusões</h2>
-      </div>
-      <div class="slide-body">
-        <div class="takeaways end-cards"></div>
+    <!-- 13 · Obrigado -->
+    <section class="slide slide-cover slide-thanks" data-title="Obrigado" data-init="thanks">
+      <div class="cover-bg"></div>
+      <div class="cover-content">
+        <h1>Obrigado!</h1>
+        <p class="lead">Dúvidas?</p>
+        <div class="cover-meta">
+          <span class="pill"><span class="sw" style="background:var(--bfs)"></span>Reginaldo Gama</span>
+          <span class="pill"><span class="sw" style="background:var(--dfs)"></span>Luís Rafael Sena</span>
+        </div>
       </div>
     </section>
 

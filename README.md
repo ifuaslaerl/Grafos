@@ -1,6 +1,6 @@
 # Apresentação interativa
 
-São 17 slides navegáveis com as setas ← →. Eles mostram BFS, DFS e Dijkstra rodando ao vivo, cenas em 3D e os resultados reais dos benchmarks e dos estudos de caso.
+São 13 slides navegáveis com as setas ← →. Eles mostram o Dijkstra rodando ao vivo (com vetor e com heap), cenas em 3D e os resultados reais dos benchmarks e dos estudos de caso 1 e 3.
 
 ## Abrir
 
@@ -17,7 +17,7 @@ Atalhos: `←` `→` navegam, `O` abre a visão geral, `F` liga a tela cheia e `
   python site/tools/build_data.py
   ```
 
-- `data/estudos.js`: resultados dos estudos de caso 1, 2 e 3, gerados a partir de `Dados/Estudos/` (saída de `Estudos/run_estudos.sh`):
+- `data/estudos.js`: resultados dos estudos de caso 1, 2 e 3 (o 2 aparece só como número no slide de complexidade), gerados a partir de `Dados/Estudos/` (saída de `Estudos/run_estudos.sh`):
 
   ```
   python site/tools/build_estudos.py
@@ -32,7 +32,7 @@ Atalhos: `←` `→` navegam, `O` abre a visão geral, `F` liga a tela cheia e `
 | `js/engine.js` | BFS/DFS/Dijkstra (vetor e heap) no mesmo laço do `traverse_impl`, gerando um snapshot por passo |
 | `js/graphview.js` | desenho e edição do grafo (arrastar, criar/apagar vértice e aresta, editar peso) e geradores (grade, árvore, ciclo, aleatório) |
 | `js/widgets.js` | widget "ao vivo": fronteira (fila/pilha/vetor/heap), tabela pai/dist, código, controles |
-| `js/scenes.js` | cenas animadas: capa 3D, lista sendo montada, matriz esparsa, quatro fronteiras, vetor × heap 3D, árvores, explorador 3D, rede de pesquisadores |
+| `js/scenes.js` | cenas animadas: capa 3D, lista sendo montada, quatro fronteiras, vetor × heap 3D, árvores, explorador 3D, rede de pesquisadores |
 | `js/charts.js` | gráficos dos dados reais (desempenho, graus, memória, complexidade) |
 | `js/app.js` | navegação dos slides e inicialização de cada um |
 | `css/style.css`, `css/scenes.css` | estilos base e das cenas |

@@ -47,23 +47,7 @@
 @keyframes cell-in { from { opacity: 0; transform: translateX(-14px) scale(.7); } }
 
 /* ==========================================================
-   Slide 3 · memória e matriz esparsa
-   ========================================================== */
-.mem-bar.over .val { text-decoration: underline wavy color-mix(in srgb, var(--danger) 60%, transparent); text-underline-offset: 6px; }
-.mem-bar .badge { margin-left: 4px; }
-.mem-verdict { padding: 12px 14px; border-radius: var(--radius-sm); font-size: 14px; line-height: 1.55; color: var(--text-2); border: 1px solid var(--line-soft); }
-.mem-verdict.bad { border-color: color-mix(in srgb, var(--danger) 40%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); }
-.mem-verdict.good { border-color: color-mix(in srgb, var(--ok) 40%, transparent); background: color-mix(in srgb, var(--ok) 8%, transparent); }
-.sparse-host { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-.sparse { width: 100%; max-width: 330px; height: auto; display: block; }
-.sparse .sc { fill: var(--bg-2); stroke: var(--line-soft); stroke-width: .5; transition: fill .35s; }
-.sparse .sc.diag { fill: var(--surface-2); }
-.sparse .sc.on { fill: var(--ok); stroke: none; animation: sc-pop .5s ease-out; transform-box: fill-box; transform-origin: center; }
-@keyframes sc-pop { from { transform: scale(2.2); fill: #fff; } }
-.sparse-note { text-align: center; }
-
-/* ==========================================================
-   Slide 6 · quatro fronteiras
+   Slide 3 · quatro fronteiras
    ========================================================== */
 .quad-host { min-height: 0; }
 .quad-grid { display: grid; grid-template-columns: minmax(340px, .9fr) minmax(0, 2fr); gap: 16px; flex: 1; min-height: 0; }
@@ -91,7 +75,7 @@
 .qp-order { color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; text-align: left; flex: 1; min-width: 0; }
 
 /* ==========================================================
-   Slide 8 · vetor x heap em 3D
+   Slide 5 · vetor x heap em 3D
    ========================================================== */
 .vh-host { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
 .vh-host > .row { flex-wrap: wrap; }
@@ -121,7 +105,7 @@
 .race-fill { height: 100%; width: 0; border-radius: 6px; transition: width .6s cubic-bezier(.2, .7, .2, 1); }
 
 /* ==========================================================
-   Slide 12 · forma das árvores
+   Slide 9 · forma das árvores
    ========================================================== */
 .tree-chart { overflow: hidden; border-radius: var(--radius-sm); background: radial-gradient(500px 300px at 50% 50%, rgba(255, 255, 255, .03), transparent 70%); cursor: grab; }
 .tree-chart:active { cursor: grabbing; }
@@ -129,7 +113,7 @@
 .explica b { color: var(--text); }
 
 /* ==========================================================
-   Slide 13 · explorador 3D
+   Slide 10 · explorador 3D
    ========================================================== */
 .x3d { position: absolute; inset: 0; background: radial-gradient(700px 500px at 50% 45%, rgba(255, 61, 139, .07), transparent 70%), var(--bg-2); }
 .x3d-body > .card:first-child { min-height: 420px; }
@@ -139,12 +123,13 @@
 /* ==========================================================
    Estudos de caso
    ========================================================== */
-.e1-body, .e2-body, .e3-body { min-height: 0; }
-.e1-tabs { flex-wrap: wrap; }
+.e1-body, .e3-body { min-height: 0; }
+.e1-tabs, .e3-tabs { flex-wrap: wrap; }
+.rg-slot { display: flex; flex-direction: column; }
+.rg-slot .rg { flex: 1; }
+.e3-nota { margin: 0 0 10px; color: var(--text-2); }
 .e1-chart { min-height: 260px; }
 .path .pv, .path .arr { animation: rise .35s ease both; animation-delay: calc(var(--i, 0) * 45ms); }
-.e2-chart { min-height: 280px; }
-.sw.hatch { background: repeating-linear-gradient(45deg, var(--vec) 0 2px, transparent 2px 4px); }
 .e3-list { display: flex; flex-direction: column; gap: 10px; overflow: auto; }
 .e3-item { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--line-soft); transition: border-color .2s, background .2s; cursor: default; }
 .e3-item:hover { border-color: var(--bfs); background: color-mix(in srgb, var(--bfs) 7%, transparent); }
@@ -165,3 +150,18 @@
 }
 .rg-ilha { fill: none; stroke: var(--danger); stroke-opacity: .5; stroke-dasharray: 5 4; }
 .rg-ilha-t { fill: var(--danger); font-size: 11px; font-family: var(--font-mono); opacity: .85; }
+
+/* legenda do grafico de complexidade */
+.theory-legend { gap: 8px 18px; font-size: 12.5px; color: var(--text-2); }
+.theory-legend > span { display: inline-flex; align-items: center; gap: 7px; }
+.theory-legend .dot { width: 11px; height: 11px; border-radius: 50%; }
+.theory-legend .dash { width: 22px; border-top: 2px dashed var(--vec); opacity: .6; }
+.theory-legend .bar { width: 3px; height: 14px; background: var(--line); border-radius: 2px; }
+.deg-nota:empty { display: none; }
+
+/* slide final */
+.slide-thanks { align-items: center; }
+.slide-thanks .cover-content { align-items: center; text-align: center; }
+.slide-thanks .cover-content h1 { font-size: clamp(56px, 9vw, 120px); }
+.slide-thanks .lead { font-size: clamp(22px, 2.6vw, 34px); color: var(--text-2); }
+.slide-thanks .cover-bg { -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,.25) 0%, #000 70%); mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,.25) 0%, #000 70%); }
