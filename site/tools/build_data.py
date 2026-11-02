@@ -135,7 +135,7 @@ def main():
 
         graus[gid] = ler_graus(gid)
 
-        # W_6 e W_7 vieram sem os CSVs das arvores: ficam fora dos slides de arvores
+        # grafo sem os CSVs das arvores fica fora dos slides de arvores
         if not all(os.path.exists(os.path.join(DADOS, "CSV", f"{alg}_{gid}.csv")) for alg in ("bfs", "dfs", "dijkstra")):
             print(f"  {gid}: sem CSVs de arvore, pulando amostras", flush=True)
             continue

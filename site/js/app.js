@@ -5,7 +5,7 @@
   const G = (id) => DADOS.grafos.find((g) => g.id === id);
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   let cur = -1;
-  // grafos com amostra das arvores (W_6 e W_7 vieram sem os CSVs de BFS/DFS/Dijkstra)
+  // grafos com amostra das arvores (os que tem os CSVs de BFS/DFS/Dijkstra)
   const COM_ARVORE = DADOS.grafos.filter((g) => DADOS.arvores[g.id]);
 
   // Os dois vertices de maior grau da rede de colaboracao
