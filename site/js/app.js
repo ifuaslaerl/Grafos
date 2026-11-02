@@ -5,6 +5,8 @@
   const G = (id) => DADOS.grafos.find((g) => g.id === id);
   const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   let cur = -1;
+  // grafos com amostra das arvores (W_6 e W_7 vieram sem os CSVs de BFS/DFS/Dijkstra)
+  const COM_ARVORE = DADOS.grafos.filter((g) => DADOS.arvores[g.id]);
 
   // Os dois vertices de maior grau da rede de colaboracao
   const GIGANTES = [{ grau: 643, nome: "Wei Wang" }, { grau: 605, nome: "Wei Li" }];
@@ -15,7 +17,7 @@
     { label: "Caminhos mínimos", nomes: ["Richard Bellman", "Robert W. Floyd", "Stephen Warshall", "Robert Endre Tarjan", "Leonhard Euler"],
       nota: "Os nomes por trás de Bellman-Ford, Floyd-Warshall e Tarjan. Euler aparece no DBLP, mas sem nenhum coautor." },
     { label: "Lendas", nomes: ["Edsger W. Dijkstra", "Donald E. Knuth", "Paul Erdös", "Richard M. Karp", "Claude E. Shannon", "John von Neumann"] },
-    { label: "UFRJ · algoritmos e grafos", nomes: ["Valmir C. Barbosa", "Celina M. Herrera de Figueiredo", "Jayme Luiz Szwarcfiter", "Sulamita Klein", "Fábio Protti", "Nelson Maculan"] },
+    { label: "UFRJ · algoritmos e grafos", nomes: ["Daniel R. Figueiredo", "Valmir C. Barbosa", "Celina M. Herrera de Figueiredo", "Jayme Luiz Szwarcfiter", "Sulamita Klein", "Fábio Protti", "Nelson Maculan"] },
     { label: "UFRJ · sistemas", nomes: ["Edmundo de Souza e Silva", "Rosa M. M. Leão", "Daniel Sadoc Menasché", "Felipe M. G. França", "Claudio Esperança", "Ricardo Marroquim", "Geraldo Xexéo", "Guilherme Horta Travassos"] },
     { label: "Os dois gigantes", nomes: ["Wei Wang", "Wei Li"],
       nota: "<b>Wei Wang</b> (643 coautores) e <b>Wei Li</b> (605) são os vértices de maior grau da rede. Muito provavelmente nenhum dos dois é uma pessoa só: são nomes muito comuns, e pesquisadores homônimos acabam somados num único vértice. Escolha um deles como origem para ver como ficam perto de todo mundo." },
@@ -106,7 +108,7 @@
 
     trees(s) {
       const sel = s.querySelector(".tree-graph");
-      sel.innerHTML = DADOS.grafos.map((g) => `<option value="${g.id}">${g.nome}</option>`).join("");
+      sel.innerHTML = COM_ARVORE.map((g) => `<option value="${g.id}">${g.nome}</option>`).join("");
       sel.value = "W_3";
       let alg = "bfs";
       const chart = Scenes.ForceTree(s.querySelector(".tree-chart"), (i) => {
@@ -134,7 +136,7 @@
 
     gallery(s) {
       const sel = s.querySelector(".x3d-graph");
-      sel.innerHTML = DADOS.grafos.map((g) => `<option value="${g.id}">${g.nome}</option>`).join("");
+      sel.innerHTML = COM_ARVORE.map((g) => `<option value="${g.id}">${g.nome}</option>`).join("");
       sel.value = "rede_colaboracao";
       const algs = new Set(["bfs", "dfs", "dijkstra"]);
       const ex = Scenes.Explorer3D(s.querySelector(".x3d"), (st) => {
