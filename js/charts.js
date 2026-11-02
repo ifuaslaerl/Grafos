@@ -337,11 +337,11 @@
     const pts = DADOS.grafos.slice().sort((a, b) => a.n - b.n || a.m - b.m).map((g) => ({ g, vetor: opsVetor(g), heap: opsHeap(g) }));
     function draw(w, h) {
       svg.selectAll("*").remove();
-      const m = { t: 8, r: 64, b: 42, l: 140 };
+      const m = { t: 8, r: 84, b: 42, l: 140 };
       const y = d3.scaleBand().domain(pts.map((p) => p.g.nome)).range([m.t, h - m.b]).padding(0.35);
-      const x = d3.scaleLog().domain([1e6, 1e15]).range([m.l, w - m.r]);
-      svg.append("g").attr("class", "gridline").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(9).tickSize(-(h - m.t - m.b)).tickFormat(""));
-      svg.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(9, (d) => `10^${Math.round(Math.log10(d))}`));
+      const x = d3.scaleLog().domain([1e6, 1e16]).range([m.l, w - m.r]);
+      svg.append("g").attr("class", "gridline").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(10).tickSize(-(h - m.t - m.b)).tickFormat(""));
+      svg.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(10, (d) => `10^${Math.round(Math.log10(d))}`));
       svg.append("text").attr("class", "axis-label").attr("x", (m.l + w - m.r) / 2).attr("y", h - 6).attr("text-anchor", "middle").text("operações (escala log: cada linha da grade é 10× mais)");
       svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`)
         .call(d3.axisLeft(y).tickSize(0))
