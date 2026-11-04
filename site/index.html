@@ -64,7 +64,7 @@
         <span class="kicker">Complexidade nos grafos reais</span>
         <h2>Quando o vetor deixa de ser opção</h2>
         <p class="lead">Cada grafo do trabalho tem dois pontos: as operações do <b class="c-vec">vetor</b> (n²) e as do <b class="c-dij">heap</b> ((n+m)·log(n+m): sem o <i>decrease-key</i>, o heap pode guardar uma entrada por aresta).
-          Passe o mouse para ver a estimativa de tempo a <b>1 ns por operação</b>. Medido de verdade no W_3 (100 mil vértices, média de várias execuções): <b class="c-dij">0,16 s</b> com heap contra <b class="c-vec">40,7 s</b> com vetor, cerca de <b>260×</b>.</p>
+          Passe o mouse para ver o tempo medido do Dijkstra em cada grafo. Medido de verdade no W_3 (100 mil vértices, média de várias execuções): <b class="c-dij">0,16 s</b> com heap contra <b class="c-vec">40,7 s</b> com vetor, cerca de <b>260×</b>.</p>
       </div>
       <div class="slide-body grid-2-wide">
         <div class="card">
@@ -77,7 +77,7 @@
           <p class="note">Cada linha é um grafo do trabalho, do menor para o maior. Quanto mais longe o ponto amarelo fica do azul, mais o vetor perde.</p>
         </div>
         <div class="card">
-          <h3>Estimativa a 1 ns/op</h3>
+          <h3>Tempo medido do Dijkstra (mediana de 100 execuções)</h3>
           <div class="table-wrap"><table class="dtable theory-table"></table></div>
         </div>
       </div>
