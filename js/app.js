@@ -40,11 +40,15 @@
     theory(s) {
       Charts.TheoryChart(s.querySelector(".theory-chart"));
       const rows = DADOS.grafos.slice().sort((a, b) => a.n - b.n).map((g) => {
-        const v = g.n * g.n * 1e-9, h = (g.n + g.m) * Math.log2(g.n + g.m) * 1e-9;
-        return `<tr><td>${g.nome}</td><td>${fBig(g.n)}</td><td>${fBig(g.m)}</td><td class="c-dij">${fDur(h)}</td><td class="c-vec">${fDur(v)}</td></tr>`;
+        // so valores medidos: heap = mediana das 100 execucoes do JSON do grafo;
+        // vetor = Estudo 2 (so foi medido onde o estudo rodou)
+        const heap = g.benchmark.Dijkstra_Heap.mediana;
+        const vet = window.ESTUDOS && ESTUDOS.estudo2 && ESTUDOS.estudo2.grafos.find((x) => x.id === g.id);
+        const vetor = vet ? fMs(vet.vetor_ms) : '<span class="muted">não medido</span>';
+        return `<tr><td>${g.nome}</td><td>${fBig(g.n)}</td><td>${fBig(g.m)}</td><td class="c-dij">${fMs(heap)}</td><td class="c-vec">${vetor}</td></tr>`;
       });
       s.querySelector(".theory-table").innerHTML =
-        `<thead><tr><th>grafo</th><th>n</th><th>m</th><th>heap</th><th>vetor</th></tr></thead><tbody>${rows.join("")}</tbody>`;
+        `<thead><tr><th>grafo</th><th>n</th><th>m</th><th>heap (mediana)</th><th>vetor</th></tr></thead><tbody>${rows.join("")}</tbody>`;
     },
 
     graphs(s) {

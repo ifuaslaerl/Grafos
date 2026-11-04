@@ -358,8 +358,9 @@
         .text((p) => `${fInt(Math.round(p.vetor / p.heap))}×`);
       gp.append("rect").attr("x", m.l).attr("y", -y.step() / 2).attr("width", w - m.l - m.r).attr("height", y.step()).attr("fill", "transparent")
         .on("mousemove", (ev, p) => showTip(ev, `<b>${p.g.nome}</b> · n = ${fInt(p.g.n)}, m = ${fInt(p.g.m)}<br>
-          <span class="c-vec">vetor</span> n² ≈ <b>${p.vetor.toExponential(1)}</b> → ${fDur(p.vetor * 1e-9)} a 1 ns/op<br>
-          <span class="c-dij">heap</span> (n+m)·log(n+m) ≈ <b>${p.heap.toExponential(1)}</b> → ${fDur(p.heap * 1e-9)} a 1 ns/op<br>
+          <span class="c-vec">vetor</span> n² ≈ <b>${p.vetor.toExponential(1)}</b> operações<br>
+          <span class="c-dij">heap</span> (n+m)·log(n+m) ≈ <b>${p.heap.toExponential(1)}</b> operações<br>
+          Dijkstra (heap) medido: <b>${fMs(p.g.benchmark.Dijkstra_Heap.mediana)}</b> (mediana de ${p.g.execucoes} execuções)<br>
           o heap faz ≈ <b>${fInt(Math.round(p.vetor / p.heap))}×</b> menos operações`))
         .on("mouseleave", hideTip);
     }
