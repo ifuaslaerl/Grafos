@@ -110,6 +110,29 @@
       pick("W_5");
     },
 
+    curve(s) {
+      const chart = Charts.PerfChart(s.querySelector(".curve-chart"), { selected: null });
+      const leg = s.querySelector(".curve-legend");
+      leg.innerHTML = Charts.SERIES.map((x) => `<button data-k="${x.key}"><span class="sw" style="color:${x.cor()}"></span>${x.nome}</button>`).join("");
+      leg.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { b.classList.toggle("off"); chart.toggle(b.dataset.k); }));
+      s.querySelectorAll(".curve-stat button").forEach((b) => b.addEventListener("click", () => {
+        s.querySelectorAll(".curve-stat button").forEach((x) => x.classList.toggle("on", x === b));
+        chart.setStat(b.dataset.s);
+      }));
+      chart.setStat("ambas");
+    },
+
+    mem(s) {
+      Charts.MemChart(s.querySelector(".mem-chart"));
+      const fMB = (v) => `${fNum(v, v < 10 ? 2 : 1)} MB`;
+      const rows = DADOS.grafos.slice().sort((a, b) => a.v_mais_e - b.v_mais_e).map((g) => {
+        const t = g.telemetria;
+        return `<tr><td>${g.nome}</td><td>${fBig(g.v_mais_e)}</td><td>${fMB(t.rss_antes_get_components_mb)}</td><td>${fMB(t.rss_depois_get_components_mb)}</td><td class="c-warn"><b>${fMB(t.memoria_get_components_delta_mb)}</b></td></tr>`;
+      });
+      s.querySelector(".mem-table").innerHTML =
+        `<thead><tr><th>grafo</th><th>V + E</th><th>RSS antes</th><th>RSS depois</th><th>variação</th></tr></thead><tbody>${rows.join("")}</tbody>`;
+    },
+
     trees(s) {
       const sel = s.querySelector(".tree-graph");
       sel.innerHTML = COM_ARVORE.map((g) => `<option value="${g.id}">${g.nome}</option>`).join("");
