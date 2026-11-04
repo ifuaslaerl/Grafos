@@ -69,7 +69,8 @@
       svg.selectAll("*").remove();
       const m = { t: 14, r: 18, b: 46, l: 84 };
       const x = d3.scaleLog().domain([d3.min(grafos, (g) => g.v_mais_e) / 1.4, d3.max(grafos, (g) => g.v_mais_e) * 1.4]).range([m.l, w - m.r]);
-      const all = grafos.flatMap((g) => SERIES.map((s) => g.benchmark[s.key][stat]));
+      const stats = stat === "ambas" ? ["media", "mediana"] : [stat];
+      const all = grafos.flatMap((g) => SERIES.flatMap((s) => stats.map((st) => g.benchmark[s.key][st])));
       const y = d3.scaleLog().domain([d3.min(all) / 1.6, d3.max(all) * 1.6]).range([h - m.b, m.t]).nice();
 
       svg.append("g").attr("class", "gridline").attr("transform", `translate(${m.l},0)`)
@@ -91,22 +92,24 @@
       const sorted = grafos.slice().sort((a, b) => a.v_mais_e - b.v_mais_e);
       for (const s of SERIES) {
         if (!on.has(s.key)) continue;
-        const pts = sorted.map((g) => ({ g, x: x(g.v_mais_e), y: y(g.benchmark[s.key][stat]) }));
-        const path = svg.append("path").datum(pts).attr("fill", "none").attr("stroke", s.cor()).attr("stroke-width", 2.2)
-          .attr("stroke-opacity", .9).attr("d", d3.line().x((d) => d.x).y((d) => d.y).curve(d3.curveMonotoneX));
-        const len = path.node().getTotalLength();
-        path.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len)
-          .transition().duration(900).ease(d3.easeCubicOut).attr("stroke-dashoffset", 0);
+        for (const st of stats) {
+        const tracejada = stats.length > 1 && st === "mediana";
+        const pts = sorted.map((g) => ({ g, x: x(g.v_mais_e), y: y(g.benchmark[s.key][st]) }));
+        const path = svg.append("path").datum(pts).attr("fill", "none").attr("stroke", s.cor()).attr("stroke-width", tracejada ? 1.6 : 2.2)
+          .attr("stroke-opacity", tracejada ? .75 : .9).attr("d", d3.line().x((d) => d.x).y((d) => d.y));
+        if (tracejada) path.attr("stroke-dasharray", "6 5");
         svg.append("g").selectAll("circle").data(pts).join("circle")
           .attr("cx", (d) => d.x).attr("cy", (d) => d.y).attr("r", (d) => (d.g.id === sel ? 6.5 : 4.5))
           .attr("fill", (d) => (d.g.ponderado ? s.cor() : css("--bg"))).attr("stroke", s.cor()).attr("stroke-width", 2)
           .style("cursor", "pointer")
           .on("mousemove", (ev, d) => showTip(ev, `<b>${d.g.nome}</b>${d.g.ponderado ? '<span class="badge w">pesos</span>' : ""}<br>
             <span class="muted">n</span> ${fInt(d.g.n)} · <span class="muted">m</span> ${fInt(d.g.m)}<br>
-            <span style="color:${s.cor()}">${s.nome}</span>: <b>${fMs(d.g.benchmark[s.key][stat])}</b> (${stat})<br>
-            <span class="muted">clique para ver as 100 execuções</span>`))
+            <span class="muted">V + E</span> ${fInt(d.g.v_mais_e)}<br>
+            <span style="color:${s.cor()}">${s.nome}</span>: média <b>${fMs(d.g.benchmark[s.key].media)}</b> · mediana <b>${fMs(d.g.benchmark[s.key].mediana)}</b><br>
+            <span class="muted">${d.g.execucoes} execuções</span>`))
           .on("mouseleave", hideTip)
           .on("click", (ev, d) => { sel = d.g.id; draw(...size); onSelect && onSelect(d.g.id); });
+        }
       }
     }
     sized(container, draw);
@@ -115,6 +118,42 @@
       toggle(k) { on.has(k) ? on.delete(k) : on.add(k); draw(...size); },
       select(id) { sel = id; draw(...size); },
     };
+  }
+
+  // ------------- memoria: variacao de RSS em get_components() (telemetria do JSON)
+  function MemChart(container) {
+    const svg = d3.select(container).append("svg");
+    const fMB = (v) => `${fNum(v, v < 10 ? 2 : 1)} MB`;
+    function draw(w, h) {
+      svg.selectAll("*").remove();
+      const grafos = DADOS.grafos.slice().sort((a, b) => a.v_mais_e - b.v_mais_e);
+      const val = (g) => g.telemetria.memoria_get_components_delta_mb;
+      const m = { t: 14, r: 18, b: 46, l: 96 };
+      const x = d3.scaleLog().domain([d3.min(grafos, (g) => g.v_mais_e) / 1.4, d3.max(grafos, (g) => g.v_mais_e) * 1.4]).range([m.l, w - m.r]);
+      const y = d3.scaleLog().domain([d3.min(grafos, val) / 1.6, d3.max(grafos, val) * 1.6]).range([h - m.b, m.t]).nice();
+      const cor = css("--warn");
+      const dec = y.ticks().filter((d) => Math.abs(Math.log10(d) - Math.round(Math.log10(d))) < 1e-9);
+      svg.append("g").attr("class", "gridline").attr("transform", `translate(${m.l},0)`)
+        .call(d3.axisLeft(y).tickValues(dec).tickSize(-(w - m.l - m.r)).tickFormat(""));
+      svg.append("g").attr("class", "axis").attr("transform", `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(5, (d) => fBig(d)));
+      svg.append("g").attr("class", "axis").attr("transform", `translate(${m.l},0)`).call(d3.axisLeft(y).tickValues(dec).tickFormat((d) => `${fInt(d)} MB`));
+      svg.append("text").attr("class", "axis-label").attr("x", (m.l + w - m.r) / 2).attr("y", h - 8).attr("text-anchor", "middle").text("tamanho do grafo: V + E (escala log)");
+      svg.append("text").attr("class", "axis-label").attr("transform", `translate(12,${(m.t + h - m.b) / 2}) rotate(-90)`).attr("text-anchor", "middle").text("variação de RSS (MB, escala log)");
+      const pts = grafos.map((g) => ({ g, x: x(g.v_mais_e), y: y(val(g)) }));
+      const path = svg.append("path").datum(pts).attr("fill", "none").attr("stroke", cor).attr("stroke-width", 2.2)
+        .attr("d", d3.line().x((d) => d.x).y((d) => d.y));
+      svg.append("g").selectAll("rect").data(pts).join("rect")
+        .attr("x", (d) => d.x - 5).attr("y", (d) => d.y - 5).attr("width", 10).attr("height", 10)
+        .attr("transform", (d) => `rotate(45 ${d.x} ${d.y})`)
+        .attr("fill", (d) => (d.g.ponderado ? cor : css("--bg"))).attr("stroke", cor).attr("stroke-width", 2)
+        .on("mousemove", (ev, d) => { const t = d.g.telemetria; showTip(ev, `<b>${d.g.nome}</b>${d.g.ponderado ? '<span class="badge w">pesos</span>' : ""}<br>
+          <span class="muted">V + E</span> ${fInt(d.g.v_mais_e)}<br>
+          RSS antes: <b>${fMB(t.rss_antes_get_components_mb)}</b><br>
+          RSS depois: <b>${fMB(t.rss_depois_get_components_mb)}</b><br>
+          variação: <b style="color:${cor}">${fMB(t.memoria_get_components_delta_mb)}</b>`); })
+        .on("mouseleave", hideTip);
+    }
+    sized(container, draw);
   }
 
   // ------------------------- barras: quanto cada busca leva, por grafo
@@ -489,6 +528,6 @@
 
   window.Charts = {
     PerfChart, PerfBars, StripChart, DegreeChart, TreeChart, TheoryChart, DualRun, CoverBackground,
-    memEstimate, SIZEOF, SERIES, fmt: { fInt, fNum, fMs, fBig, fBytes, fDur }, showTip, hideTip,
+    PerfChart, MemChart, memEstimate, SIZEOF, SERIES, fmt: { fInt, fNum, fMs, fBig, fBytes, fDur }, showTip, hideTip,
   };
 })();

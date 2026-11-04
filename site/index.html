@@ -7,8 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=20261104" />
-  <link rel="stylesheet" href="css/scenes.css?v=20261104" />
+  <link rel="stylesheet" href="css/style.css?v=20261104b" />
+  <link rel="stylesheet" href="css/scenes.css?v=20261104b" />
   <script>window.__errs=[];addEventListener("error",function(e){__errs.push(String(e.message));document.documentElement.setAttribute("data-errs",__errs.join(" | "))});</script>
 </head>
 <body>
@@ -123,6 +123,42 @@
       </div>
     </section>
 
+    <!-- Curva de performance -->
+    <section class="slide" data-title="Curva de performance" data-init="curve" style="--accent:var(--bfs)">
+      <div class="slide-head">
+        <span class="kicker">Benchmarks · get_components() · 100 execuções por grafo</span>
+        <h2>Curva de performance</h2>
+        <p class="lead">Tempo de cada busca contra o tamanho do grafo (V + E), com os dois eixos em escala log. A linha cheia é a <b>média</b> e a tracejada é a <b>mediana</b> das 100 execuções registradas no JSON de cada grafo.
+          Os pontos cheios são grafos com pesos. Passe o mouse para ver os valores.</p>
+      </div>
+      <div class="slide-body">
+        <div class="card" style="flex:1">
+          <div class="row"><div class="legend curve-legend"></div><span class="spacer"></span>
+            <div class="seg curve-stat"><button data-s="ambas" class="on">média e mediana</button><button data-s="media">média</button><button data-s="mediana">mediana</button></div></div>
+          <div class="chart curve-chart"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Memoria -->
+    <section class="slide" data-title="Memória" data-init="mem" style="--accent:var(--warn)">
+      <div class="slide-head">
+        <span class="kicker">Telemetria · RSS do processo antes e depois de get_components()</span>
+        <h2>Quanta memória cada grafo usou</h2>
+        <p class="lead">Valores medidos e gravados no JSON de cada grafo: o RSS do processo antes e depois de <code>get_components()</code> e a variação entre os dois.</p>
+      </div>
+      <div class="slide-body grid-2-wide">
+        <div class="card">
+          <div class="chart mem-chart"></div>
+          <p class="note">Losango cheio: grafo com pesos. Passe o mouse para ver o RSS antes, o RSS depois e a variação.</p>
+        </div>
+        <div class="card">
+          <h3>RSS em get_components()</h3>
+          <div class="table-wrap"><table class="dtable mem-table"></table></div>
+        </div>
+      </div>
+    </section>
+
     <!-- 7 · Árvores -->
     <section class="slide" data-title="A forma de cada busca" data-init="trees" style="--accent:var(--bfs)">
       <div class="slide-head">
@@ -230,14 +266,14 @@
 
   <script src="js/vendor/d3.v7.min.js"></script>
   <script src="js/vendor/3d-force-graph.min.js"></script>
-  <script src="data/dados.js?v=20261104"></script>
-  <script src="data/dados3d.js?v=20261104"></script>
-  <script src="data/estudos.js?v=20261104"></script>
-  <script src="js/engine.js?v=20261104"></script>
-  <script src="js/graphview.js?v=20261104"></script>
-  <script src="js/widgets.js?v=20261104"></script>
-  <script src="js/charts.js?v=20261104"></script>
-  <script src="js/scenes.js?v=20261104"></script>
-  <script src="js/app.js?v=20261104"></script>
+  <script src="data/dados.js?v=20261104b"></script>
+  <script src="data/dados3d.js?v=20261104b"></script>
+  <script src="data/estudos.js?v=20261104b"></script>
+  <script src="js/engine.js?v=20261104b"></script>
+  <script src="js/graphview.js?v=20261104b"></script>
+  <script src="js/widgets.js?v=20261104b"></script>
+  <script src="js/charts.js?v=20261104b"></script>
+  <script src="js/scenes.js?v=20261104b"></script>
+  <script src="js/app.js?v=20261104b"></script>
 </body>
 </html>
