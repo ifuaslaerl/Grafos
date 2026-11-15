@@ -1,10 +1,13 @@
 #include <bits/stdc++.h>
+#include "algorithm.hpp"
 using namespace std;
 
 template<typename T>
-class FloydWarshall{
+class FloydWarshall: public IAlgorithm<T>{
+public:
     int n;
     bool negative_cicle;
+    int source;
     const T inf = numeric_limits<T>::max();
     vector<vector<T>> dist;
     vector<vector<int>> pai;
@@ -12,6 +15,7 @@ class FloydWarshall{
     FloydWarshall(int n_): 
         n(n_),
         negative_cicle(false),
+        source(0),
         dist(n_+1, vector<T>(n_+1, inf)), 
         pai(n_+1, vector<int>(n_+1)) 
     {
@@ -21,11 +25,13 @@ class FloydWarshall{
         }
     } 
 
-    void add_edge(int u, int v, T w){
+    void add_edge(int u, int v, T w=1) override{
         dist[u][v] = min(dist[u][v], w);
+        pai[u][v] = u;
     }
 
-    void run(){
+    void run(int source_) override{
+        source = source_;
         for(int k=1; k<=n; k++){
             for(int i=1; i<=n; i++){
                 for(int j=1; j<=n; j++){
@@ -37,6 +43,7 @@ class FloydWarshall{
                     }
                 }
             }
+
         }
 
         for(int v=1; v<=n; v++){
@@ -44,4 +51,8 @@ class FloydWarshall{
             negative_cicle=true;
         }
     }
+
+    vector<T> get_dists() const override {return dist[source];}
+    vector<int> get_tree() const override {return pai[source];}
+    bool has_negative_cycle() const override {return negative_cicle;}
 };

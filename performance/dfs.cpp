@@ -1,7 +1,9 @@
 #include <bits/stdc++.h>
+#include "algorithm.hpp"
 using namespace std;
 
-class Dfs{
+class Dfs: public IAlgorithm<int>{
+public:
     int n;
     const int inf = numeric_limits<int>::max();
     vector<int> pai, dist;
@@ -14,7 +16,7 @@ class Dfs{
         adj(n_+1) 
     {} 
 
-    void add_edge(int u, int v){
+    void add_edge(int u, int v, int w=1) override{
         adj[u].push_back(v);
     }
 
@@ -27,9 +29,12 @@ class Dfs{
         }
     }
 
-    void run(int s){
+    void run(int s) override{
         // vai virar dist[s] + 1 = 0 depois
         dist[s] = -1; 
         dfs(s, s);
     }
+
+    vector<int> get_dists() const override {return dist;}
+    vector<int> get_tree() const override {return pai;}
 };

@@ -1,12 +1,14 @@
 #include <bits/stdc++.h>
+#include "algorithm.hpp"
 using namespace std;
 
 template<typename T>
-class BellmanFord{
+class BellmanFord: public IAlgorithm<T>{
+public:
 
     struct Edge{
-        T w;
         int u, v;
+        T w;
         Edge(int u_, int v_, T w_): u(u_), v(v_), w(w_) {}
     };
 
@@ -24,11 +26,11 @@ class BellmanFord{
         dist(n_+1, inf)
     {} 
 
-    void add_edge(int u, int v, T w){
+    void add_edge(int u, int v, T w=1) override{
         edges.push_back(Edge(u, v, w));
     }
 
-    void run(int t){
+    void run(int t) override{
         dist[t] = 0;
         pai[t] = t;
 
@@ -43,4 +45,8 @@ class BellmanFord{
             }
         }
     }
+
+    vector<T> get_dists() const override {return dist;}
+    vector<int> get_tree() const override {return pai;}
+    bool has_negative_cycle() const override {return negative_cicle;}
 };

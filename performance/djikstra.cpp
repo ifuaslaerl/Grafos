@@ -1,8 +1,10 @@
 #include <bits/stdc++.h>
+#include "algorithm.hpp"
 using namespace std;
 
 template<typename T>
-class Djikstra{
+class Djikstra: public IAlgorithm<T>{
+public:
     int n;
     const T inf = numeric_limits<T>::max();
     vector<T> dist;
@@ -16,11 +18,11 @@ class Djikstra{
         adj(n_+1) 
     {} 
 
-    void add_edge(int u, int v, T w){
+    void add_edge(int u, int v, T w=1) override{
         adj[u].push_back({v, w});
     }
 
-    void run(int s){
+    void run(int s) override{
         priority_queue<
             pair<T, int>,
             vector<pair<T, int>>,
@@ -42,4 +44,7 @@ class Djikstra{
             }
         }
     }
+
+    vector<T> get_dists() const override {return dist;}
+    vector<int> get_tree() const override {return pai;}
 };
