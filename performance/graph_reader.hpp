@@ -20,6 +20,11 @@ enum class GraphDirection{
     undirected
 };
 
+enum class EdgeWeightHandling{
+    use_input,
+    ignore_input
+};
+
 inline int read_vertex_count(istream& input){
     int vertex_count;
     if(!(input >> vertex_count) || vertex_count < 0){
@@ -34,7 +39,8 @@ void read_edges(
     IAlgorithm<T>& algorithm,
     int vertex_count,
     EdgeWeightFormat weight_format,
-    GraphDirection direction
+    GraphDirection direction,
+    EdgeWeightHandling weight_handling=EdgeWeightHandling::use_input
 ){
     if(vertex_count < 0){
         throw invalid_argument("O numero de vertices nao pode ser negativo.");
@@ -47,8 +53,17 @@ void read_edges(
         if(!(input >> v)){
             throw runtime_error("Aresta incompleta na entrada.");
         }
-        if(weight_format == EdgeWeightFormat::weighted && !(input >> weight)){
-            throw runtime_error("Peso invalido ou ausente na entrada.");
+        if(weight_format == EdgeWeightFormat::weighted){
+            if(weight_handling == EdgeWeightHandling::use_input){
+                if(!(input >> weight)){
+                    throw runtime_error("Peso invalido ou ausente na entrada.");
+                }
+            } else{
+                long double ignored_weight;
+                if(!(input >> ignored_weight)){
+                    throw runtime_error("Peso invalido ou ausente na entrada.");
+                }
+            }
         }
         if(u < 1 || u > vertex_count || v < 1 || v > vertex_count){
             throw out_of_range("Endpoint fora do intervalo 1..n.");

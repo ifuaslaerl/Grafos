@@ -31,13 +31,16 @@ export_graus: Exporters/export_graus.o
 export_memoria: Exporters/export_memoria.o
 	$(CXX) $(LDFLAGS) -o $@ $^
 
+performance_benchmark: performance/benchmark.cpp performance/algorithm.hpp performance/graph_reader.hpp performance/run_measurement.hpp performance/bfs.cpp performance/dfs.cpp performance/djikstra.cpp performance/bellman_ford.cpp performance/floyd_warshall.cpp
+	$(CXX) $(CXXFLAGS) -pthread -o $@ performance/benchmark.cpp $(LDFLAGS) -pthread
+
 # Regra genérica para transformar .cpp em .o respeitando as pastas
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Limpeza dos binários/objetos e artefatos gerados por testes e análise
 clean:
-	rm -f Exporters/*.o src/*.o $(TARGETS) test_graph $(JSON_OUTPUTS) $(CSV_OUTPUTS) $(ANALYSER_OUTPUTS)
+	rm -f Exporters/*.o src/*.o $(TARGETS) test_graph performance_benchmark $(JSON_OUTPUTS) $(CSV_OUTPUTS) $(ANALYSER_OUTPUTS)
 	rm -rf $(UNIT_TEST_BUILD_DIR)
 
 .PHONY: all clean

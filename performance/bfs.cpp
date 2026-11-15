@@ -1,5 +1,6 @@
 #include "algorithm.hpp"
 
+#include <cstddef>
 #include <limits>
 #include <queue>
 #include <vector>
@@ -54,4 +55,7 @@ public:
         (void)s;
         return pai;
     }
+
+    size_t max_n() const override {return 1'000'000'000;}
+    size_t max_m() const override {return 1'000'000'000;}
 };
