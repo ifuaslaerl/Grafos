@@ -18,11 +18,11 @@ public:
         adj(n_+1) 
     {} 
 
-    void add_edge(int u, int v, T w=1){
+    void add_edge(int u, int v, T w=1) override{
         adj[u].push_back(v);
     }
 
-    void run(int s){
+    void run(int s=1) override{
         queue<int> fila;
         fila.push(s);
         dist[s] = 0;
@@ -41,6 +41,13 @@ public:
         }
     }
 
-    vector<T> get_dists() const {return dist;}
-    vector<int> get_tree() const {return pai;}
+    vector<T> get_dists(int s=1) const override {
+        (void)s;
+        return dist;
+    }
+
+    vector<int> get_tree(int s=1) const override {
+        (void)s;
+        return pai;
+    }
 };

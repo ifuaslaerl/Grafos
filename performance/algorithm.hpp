@@ -11,9 +11,9 @@ public:
     virtual ~IAlgorithm() = default;
 
     virtual void add_edge(int u, int v, T w=1) = 0;
-    virtual void run(int source) = 0;
-    virtual vector<T> get_dists() const = 0;
-    virtual vector<int> get_tree() const = 0;
+    virtual void run(int s=1) = 0;
+    virtual vector<T> get_dists(int s=1) const = 0;
+    virtual vector<int> get_tree(int s=1) const = 0;
     virtual bool has_negative_cycle() const {return false;}
 };
 

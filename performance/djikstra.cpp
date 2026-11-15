@@ -22,7 +22,7 @@ public:
         adj[u].push_back({v, w});
     }
 
-    void run(int s) override{
+    void run(int s=1) override{
         priority_queue<
             pair<T, int>,
             vector<pair<T, int>>,
@@ -45,6 +45,13 @@ public:
         }
     }
 
-    vector<T> get_dists() const override {return dist;}
-    vector<int> get_tree() const override {return pai;}
+    vector<T> get_dists(int s=1) const override {
+        (void)s;
+        return dist;
+    }
+
+    vector<int> get_tree(int s=1) const override {
+        (void)s;
+        return pai;
+    }
 };

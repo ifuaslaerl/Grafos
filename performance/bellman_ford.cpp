@@ -30,9 +30,9 @@ public:
         edges.push_back(Edge(u, v, w));
     }
 
-    void run(int t) override{
-        dist[t] = 0;
-        pai[t] = t;
+    void run(int s=1) override{
+        dist[s] = 0;
+        pai[s] = s;
 
         for(int k=1; k<=n; k++){
             for(Edge e: edges){
@@ -46,7 +46,15 @@ public:
         }
     }
 
-    vector<T> get_dists() const override {return dist;}
-    vector<int> get_tree() const override {return pai;}
+    vector<T> get_dists(int s=1) const override {
+        (void)s;
+        return dist;
+    }
+
+    vector<int> get_tree(int s=1) const override {
+        (void)s;
+        return pai;
+    }
+
     bool has_negative_cycle() const override {return negative_cicle;}
 };

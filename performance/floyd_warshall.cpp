@@ -7,7 +7,6 @@ class FloydWarshall: public IAlgorithm<T>{
 public:
     int n;
     bool negative_cicle;
-    int source;
     const T inf = numeric_limits<T>::max();
     vector<vector<T>> dist;
     vector<vector<int>> pai;
@@ -15,7 +14,6 @@ public:
     FloydWarshall(int n_): 
         n(n_),
         negative_cicle(false),
-        source(0),
         dist(n_+1, vector<T>(n_+1, inf)), 
         pai(n_+1, vector<int>(n_+1)) 
     {
@@ -30,8 +28,8 @@ public:
         pai[u][v] = u;
     }
 
-    void run(int source_) override{
-        source = source_;
+    void run(int s=1) override{
+        (void)s;
         for(int k=1; k<=n; k++){
             for(int i=1; i<=n; i++){
                 for(int j=1; j<=n; j++){
@@ -52,7 +50,7 @@ public:
         }
     }
 
-    vector<T> get_dists() const override {return dist[source];}
-    vector<int> get_tree() const override {return pai[source];}
+    vector<T> get_dists(int s=1) const override {return dist[s];}
+    vector<int> get_tree(int s=1) const override {return pai[s];}
     bool has_negative_cycle() const override {return negative_cicle;}
 };

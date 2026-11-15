@@ -29,12 +29,19 @@ public:
         }
     }
 
-    void run(int s) override{
+    void run(int s=1) override{
         // vai virar dist[s] + 1 = 0 depois
         dist[s] = -1; 
         dfs(s, s);
     }
 
-    vector<int> get_dists() const override {return dist;}
-    vector<int> get_tree() const override {return pai;}
+    vector<int> get_dists(int s=1) const override {
+        (void)s;
+        return dist;
+    }
+
+    vector<int> get_tree(int s=1) const override {
+        (void)s;
+        return pai;
+    }
 };
