@@ -1,5 +1,9 @@
-#include <bits/stdc++.h>
 #include "algorithm.hpp"
+
+#include <algorithm>
+#include <limits>
+#include <vector>
+
 using namespace std;
 
 template<typename T>

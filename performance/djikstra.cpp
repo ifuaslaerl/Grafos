@@ -1,5 +1,11 @@
-#include <bits/stdc++.h>
 #include "algorithm.hpp"
+
+#include <functional>
+#include <limits>
+#include <queue>
+#include <utility>
+#include <vector>
+
 using namespace std;
 
 template<typename T>
