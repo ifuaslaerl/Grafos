@@ -56,6 +56,6 @@ public:
         return pai;
     }
 
-    size_t max_n() const override {return 1'000'000'000;}
-    size_t max_m() const override {return 1'000'000'000;}
+    size_t max_n() const override {return 5e7;}
+    size_t max_m() const override {return 1e9;}
 };

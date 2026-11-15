@@ -57,4 +57,7 @@ public:
     vector<T> get_dists(int s=1) const override {return dist[s];}
     vector<int> get_tree(int s=1) const override {return pai[s];}
     bool has_negative_cycle() const override {return negative_cicle;}
+
+    size_t max_n() const override {return 2e3;}
+    size_t max_m() const override {return 1e9;}
 };

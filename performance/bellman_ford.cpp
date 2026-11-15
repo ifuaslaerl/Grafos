@@ -60,4 +60,7 @@ public:
     }
 
     bool has_negative_cycle() const override {return negative_cicle;}
+
+    size_t max_n() const override {return 5e4;}
+    size_t max_m() const override {return 5e4;}
 };
