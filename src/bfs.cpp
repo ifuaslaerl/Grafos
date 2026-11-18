@@ -27,7 +27,11 @@ public:
         adj[u].push_back(v);
     }
 
-    void run(int s=1) override{
+    bool should_run(int n, int m) const override{
+        return static_cast<long long>(n) + m <= this->operation_budget;
+    }
+
+    void go(int s=1){
         queue<int> fila;
         fila.push(s);
         dist[s] = 0;
@@ -46,16 +50,21 @@ public:
         }
     }
 
+    void run(int s=1) override{
+        go(s);
+
+        for(int v=1; v<=n; v++){
+            if(dist[v] != inf) continue;
+            go(v);
+        }
+    }
+
     vector<T> get_dists(int s=1) const override {
-        (void)s;
         return dist;
     }
 
     vector<int> get_tree(int s=1) const override {
-        (void)s;
         return pai;
     }
 
-    size_t max_n() const override {return 5e7;}
-    size_t max_m() const override {return 1e9;}
 };

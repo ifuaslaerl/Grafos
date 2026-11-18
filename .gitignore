@@ -90,15 +90,7 @@ __pycache__/
 /unit_tests/.build/
 
 # Project executables
-/export_json
-/export_grafo
-/export_graus
-/export_memoria
-/test_graph
-/performance_benchmark
+pipe
 
 # Dados brutos (CSVs/PNGs grandes gerados pelos exportadores)
 /Dados/
-
-# Grafos de entrada da disciplina (ate 700 MB cada, acima do limite do GitHub)
-/src/testes/

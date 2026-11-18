@@ -57,8 +57,8 @@ pesos não negativos.
 
 ### Programa para testes manuais
 
-`make test_graph` gera `./test_graph`. Ele lê `n` na primeira linha e, em cada
-linha seguinte, `u v peso`. O vértice inicial é opcional e vale `1` por padrão:
+`make test_graph` gera `./test_graph`. A primeira linha contém `n m`, seguida
+por `m` linhas `u v peso`. O vértice inicial é opcional e vale `1` por padrão:
 
 ```bash
 ./test_graph 1 < grafo_ponderado.txt
@@ -69,15 +69,29 @@ implementações de Dijkstra.
 
 ## Exportadores e grafos ponderados
 
-Os exportadores leem grafos não direcionados. Para grafos não ponderados, a
-primeira linha contém `n`, seguida por linhas `u v`. Para grafos ponderados, as
-arestas têm o formato `u v peso`; use `--weighted` nos exportadores para indicar
-esse formato.
+Os exportadores leem grafos não direcionados. A primeira linha de toda entrada
+contém `n m`, com o número de vértices e o número de arestas; seguem exatamente
+`m` linhas de arestas. Para grafos não ponderados, cada linha contém `u v`. Para
+grafos ponderados, as arestas têm o formato `u v peso`; use `--weighted` nos
+exportadores para indicar esse formato. O `pipe` lê apenas
+`n m` para decidir se executa cada algoritmo; só lê as arestas dos casos
+aceitos e confere que a quantidade lida corresponde a `m`.
+
+Para compilar e executar o benchmark com pilha ilimitada (necessária para a DFS
+recursiva em grafos profundos), use. A memória da pilha cresce conforme a
+profundidade da recursão e pode esgotar a memória disponível:
+
+```bash
+./run_performance_benchmark.sh [diretorio_de_entrada] [arquivo_csv]
+```
+
+O benchmark processa todos os algoritmos de um grafo antes de avançar para o
+próximo.
 
 Exemplo:
 
 ```text
-5
+5 5
 1 2
 2 5
 5 3

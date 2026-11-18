@@ -4,11 +4,19 @@
 #include "algorithm.hpp"
 
 #include <istream>
+#include <limits>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 
 using namespace std;
 
 namespace graph_io{
+
+struct Header{
+    int vertex_count;
+    size_t edge_count;
+};
 
 enum class EdgeWeightFormat{
     unweighted,
@@ -25,12 +33,32 @@ enum class EdgeWeightHandling{
     ignore_input
 };
 
-inline int read_vertex_count(istream& input){
-    int vertex_count;
-    if(!(input >> vertex_count) || vertex_count < 0){
-        throw runtime_error("Numero de vertices invalido na entrada.");
+inline Header read_header(istream& input){
+    string line;
+    if(!getline(input, line)){
+        throw runtime_error("O cabecalho deve conter N e M validos.");
     }
-    return vertex_count;
+
+    istringstream fields(line);
+    long long vertex_count;
+    long long edge_count;
+    if(!(fields >> vertex_count >> edge_count) ||
+       vertex_count < 0 ||
+       vertex_count > numeric_limits<int>::max() ||
+       edge_count < 0){
+        throw runtime_error("O cabecalho deve conter N e M validos.");
+    }
+
+    string extra;
+    if(fields >> extra){
+        throw runtime_error("O cabecalho deve conter N e M validos.");
+    }
+
+    Header header{
+        static_cast<int>(vertex_count),
+        static_cast<size_t>(edge_count)
+    };
+    return header;
 }
 
 template<typename T>
@@ -40,6 +68,7 @@ void read_edges(
     int vertex_count,
     EdgeWeightFormat weight_format,
     GraphDirection direction,
+    size_t expected_edge_count,
     EdgeWeightHandling weight_handling=EdgeWeightHandling::use_input
 ){
     if(vertex_count < 0){
@@ -47,6 +76,7 @@ void read_edges(
     }
 
     int u;
+    size_t edges_read = 0;
     while(input >> u){
         int v;
         T weight{1};
@@ -66,17 +96,26 @@ void read_edges(
             }
         }
         if(u < 1 || u > vertex_count || v < 1 || v > vertex_count){
-            throw out_of_range("Endpoint fora do intervalo 1..n.");
+            throw out_of_range(
+                "Aresta " + to_string(edges_read + 1) + " (" +
+                to_string(u) + ", " + to_string(v) +
+                ") fora do intervalo inclusivo [1, " +
+                to_string(vertex_count) + "]."
+            );
         }
 
         algorithm.add_edge(u, v, weight);
         if(direction == GraphDirection::undirected){
             algorithm.add_edge(v, u, weight);
         }
+        ++edges_read;
     }
 
     if(input.bad() || !input.eof()){
         throw runtime_error("Formato invalido nas arestas de entrada.");
+    }
+    if(edges_read != expected_edge_count){
+        throw runtime_error("M no cabecalho nao coincide com as arestas lidas.");
     }
 }
 

@@ -32,6 +32,11 @@ public:
         pai[u][v] = u;
     }
 
+    bool should_run(int n, int) const override{
+        return static_cast<__int128>(n) * n * n
+            <= this->operation_budget;
+    }
+
     void run(int s=1) override{
         (void)s;
         for(int k=1; k<=n; k++){
@@ -58,6 +63,4 @@ public:
     vector<int> get_tree(int s=1) const override {return pai[s];}
     bool has_negative_cycle() const override {return negative_cicle;}
 
-    size_t max_n() const override {return 2e3;}
-    size_t max_m() const override {return 1e9;}
 };

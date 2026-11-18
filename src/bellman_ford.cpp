@@ -33,6 +33,11 @@ public:
         edges.push_back(Edge(u, v, w));
     }
 
+    bool should_run(int n, int m) const override{
+        return static_cast<long long>(n) * m
+            <= this->operation_budget;
+    }
+
     void run(int s=1) override{
         dist[s] = 0;
         pai[s] = s;
@@ -61,6 +66,4 @@ public:
 
     bool has_negative_cycle() const override {return negative_cicle;}
 
-    size_t max_n() const override {return 5e4;}
-    size_t max_m() const override {return 5e4;}
 };

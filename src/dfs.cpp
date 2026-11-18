@@ -23,6 +23,10 @@ public:
         adj[u].push_back(v);
     }
 
+    bool should_run(int n, int m) const override{
+        return static_cast<long long>(n) + m <= this->operation_budget;
+    }
+
     void dfs(int v, int p){
         pai[v] = p;
         dist[v] = dist[p]+1;
@@ -36,6 +40,12 @@ public:
         // vai virar dist[s] + 1 = 0 depois
         dist[s] = -1; 
         dfs(s, s);
+
+        for(int v=1; v<=n; v++){
+            if(dist[v] != inf) continue;
+            dist[v] = -1;
+            dfs(v, v);
+        }
     }
 
     vector<int> get_dists(int s=1) const override {
@@ -48,6 +58,4 @@ public:
         return pai;
     }
 
-    size_t max_n() const override {return 5e7;}
-    size_t max_m() const override {return 1e9;}
 };
