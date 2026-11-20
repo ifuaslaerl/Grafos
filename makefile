@@ -1,6 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -O3 -march=native -flto -Wall -Wextra -I.
 LDFLAGS = -flto
+PYTHON ?= python3
 
 PIPE_SOURCES = \
 	src/benchmark.cpp \
@@ -18,7 +19,10 @@ all: pipe
 pipe: $(PIPE_SOURCES)
 	$(CXX) $(CXXFLAGS) -pthread -o $@ src/benchmark.cpp $(LDFLAGS) -pthread
 
+python:
+	$(PYTHON) -m pip install .
+
 clean:
 	rm -f pipe
 
-.PHONY: all clean
+.PHONY: all clean python
