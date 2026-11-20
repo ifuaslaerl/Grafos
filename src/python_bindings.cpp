@@ -7,6 +7,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <tuple>
+#include <vector>
+
 namespace py = pybind11;
 
 template<typename Algorithm, typename Weight>
@@ -22,6 +25,16 @@ void bind_algorithm(py::module_& module, const char* name){
             py::arg("u"),
             py::arg("v"),
             py::arg("weight") = Weight{1}
+        )
+        .def(
+            "add_edges",
+            [](Algorithm& instance,
+               const std::vector<std::tuple<int, int, Weight>>& edges){
+                for(const auto& [u, v, weight] : edges){
+                    instance.add_edge(u, v, weight);
+                }
+            },
+            py::arg("edges")
         )
         .def(
             "should_run",
