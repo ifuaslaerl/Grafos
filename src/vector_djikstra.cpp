@@ -35,21 +35,21 @@ public:
     }
 
     bool should_run(int n, int m) const override{
-        return static_cast<__int128>(n) * n + m
+        return (__int128)n * n + m
             <= this->operation_budget;
     }
 
-    void go(int source){
+    void go(int s){
         connected_components.emplace_back();
-        vector<unsigned char> visited(n + 1);
-        dist[source] = 0;
-        pai[source] = source;
+        vector<int> visited(n + 1);
+        dist[s] = 0;
+        pai[s] = s;
 
         for(int i=0; i<n; i++){
             int v = 0;
-            for(int candidate=1; candidate<=n; candidate++){
-                if(visited[candidate] || dist[candidate] == inf) continue;
-                if(v == 0 || dist[candidate] < dist[v]) v = candidate;
+            for(int u=1; u<=n; u++){
+                if(visited[u] || dist[u] == inf) continue;
+                if(v == 0 || dist[u] < dist[v]) v = u;
             }
             if(v == 0) break;
 
@@ -73,14 +73,14 @@ public:
         }
 
         sort(connected_components.begin(), connected_components.end(),
-            [](const vector<int>& a, const vector<int>& b){
+            [](const vector<int> &a, const vector<int> &b){
                 return a.size() > b.size();
             }
         );
     }
 
-    T get_aprox_diameter(int source=1){
-        int v = source;
+    T get_aprox_diameter(int s=1){
+        int v = s;
         reset();
         go(v);
         for(int u=1; u<=n; u++){
@@ -98,10 +98,15 @@ public:
         return dist[v];
     }
 
-    T get_dist(int source, int target){
+    T get_dist(int s, int t){
         reset();
-        go(source);
-        return dist[target];
+        go(s);
+        return dist[t];
+    }
+
+    vector<int> get_path(int s, int t) override{
+        get_dist(s, t);
+        return reconstruct_path(s, t, dist, pai, inf);
     }
 
     vector<T> get_dists() const override{

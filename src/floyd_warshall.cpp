@@ -36,7 +36,7 @@ public:
     }
 
     bool should_run(int n, int) const override{
-        return static_cast<__int128>(n) * n * n
+        return (__int128)n * n * n
             <= this->operation_budget;
     }
 
@@ -66,6 +66,9 @@ public:
     T get_dist(int s, int t) const override {return dist[s][t];}
     vector<T> get_dists(int s) const override {return dist[s];}
     vector<int> get_tree(int s) const override {return pai[s];}
+    vector<int> get_path(int s, int t) const override{
+        return reconstruct_path(s, t, dist[s], pai[s], inf);
+    }
     bool has_negative_cycle() const override {return negative_cicle;}
 
 };

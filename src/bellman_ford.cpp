@@ -43,7 +43,7 @@ public:
     }
 
     bool should_run(int n, int m) const override{
-        return static_cast<long long>(n) * m
+        return (ll)n * m
             <= this->operation_budget;
     }
 
@@ -87,6 +87,11 @@ public:
         reset();
         run(s);
         return dist[t];
+    }
+
+    vector<int> get_path(int s, int t) override{
+        get_dist(s, t);
+        return reconstruct_path(s, t, dist, pai, inf);
     }
 
     vector<T> get_dists() const override {

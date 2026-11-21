@@ -18,13 +18,13 @@
 namespace py = pybind11;
 
 template<typename Algorithm, typename Weight>
-void bind_algorithm(py::module_& module, const char* name){
+void bind_algorithm(py::module_ &module, const char* name){
     py::class_<Algorithm> algorithm(module, name);
     algorithm
         .def(py::init<int>(), py::arg("vertex_count"))
         .def(
             "add_edge",
-            [](Algorithm& instance, int u, int v, Weight weight){
+            [](Algorithm &instance, int u, int v, Weight weight){
                 instance.add_edge(u, v, weight);
             },
             py::arg("u"),
@@ -33,8 +33,8 @@ void bind_algorithm(py::module_& module, const char* name){
         )
         .def(
             "add_edges",
-            [](Algorithm& instance,
-               const std::vector<std::tuple<int, int, Weight>>& edges){
+            [](Algorithm &instance,
+               const std::vector<std::tuple<int, int, Weight>> &edges){
                 for(const auto& [u, v, weight] : edges){
                     instance.add_edge(u, v, weight);
                 }
@@ -43,7 +43,7 @@ void bind_algorithm(py::module_& module, const char* name){
         )
         .def(
             "should_run",
-            [](const Algorithm& instance, int vertex_count, int edge_count){
+            [](const Algorithm &instance, int vertex_count, int edge_count){
                 return instance.should_run(vertex_count, edge_count);
             },
             py::arg("vertex_count"),
@@ -51,16 +51,24 @@ void bind_algorithm(py::module_& module, const char* name){
         )
         .def(
             "get_dist",
-            [](Algorithm& instance, int source, int target){
-                return instance.get_dist(source, target);
+            [](Algorithm &instance, int s, int t){
+                return instance.get_dist(s, t);
+            },
+            py::arg("source"),
+            py::arg("target")
+        )
+        .def(
+            "get_path",
+            [](Algorithm &instance, int s, int t){
+                return instance.get_path(s, t);
             },
             py::arg("source"),
             py::arg("target")
         )
         .def(
             "get_aprox_diameter",
-            [](Algorithm& instance, int source){
-                return instance.get_aprox_diameter(source);
+            [](Algorithm &instance, int s){
+                return instance.get_aprox_diameter(s);
             },
             py::arg("source") = 1
         );
@@ -69,19 +77,19 @@ void bind_algorithm(py::module_& module, const char* name){
         algorithm
             .def(
                 "run",
-                [](Algorithm& instance){ instance.run(); }
+                [](Algorithm &instance){ instance.run(); }
             )
             .def(
                 "get_dists",
-                [](const Algorithm& instance, int source){
-                    return instance.get_dists(source);
+                [](const Algorithm &instance, int s){
+                    return instance.get_dists(s);
                 },
                 py::arg("source")
             )
             .def(
                 "get_tree",
-                [](const Algorithm& instance, int source){
-                    return instance.get_tree(source);
+                [](const Algorithm &instance, int s){
+                    return instance.get_tree(s);
                 },
                 py::arg("source")
             );
@@ -89,20 +97,20 @@ void bind_algorithm(py::module_& module, const char* name){
         algorithm
             .def(
                 "run",
-                [](Algorithm& instance, int source){
-                    instance.run(source);
+                [](Algorithm &instance, int s){
+                    instance.run(s);
                 },
                 py::arg("source") = 1
             )
             .def(
                 "get_dists",
-                [](const Algorithm& instance){
+                [](const Algorithm &instance){
                     return instance.get_dists();
                 }
             )
             .def(
                 "get_tree",
-                [](const Algorithm& instance){
+                [](const Algorithm &instance){
                     return instance.get_tree();
                 }
             );
@@ -111,7 +119,7 @@ void bind_algorithm(py::module_& module, const char* name){
     if constexpr(std::is_base_of_v<INegativeCycleDetector, Algorithm>){
         algorithm.def(
             "has_negative_cycle",
-            [](const Algorithm& instance){
+            [](const Algorithm &instance){
                 return instance.has_negative_cycle();
             }
         );
@@ -124,14 +132,14 @@ void bind_algorithm(py::module_& module, const char* name){
         algorithm
             .def(
                 "run_from",
-                [](Algorithm& instance, int source){
-                    instance.run_from(source);
+                [](Algorithm &instance, int s){
+                    instance.run_from(s);
                 },
                 py::arg("source")
             )
             .def(
                 "get_components",
-                [](const Algorithm& instance){
+                [](const Algorithm &instance){
                     return instance.get_components();
                 }
             );
@@ -163,8 +171,8 @@ PYBIND11_MODULE(grafos, module){
         )
         .def(
             "add_edges",
-            [](Statistics<double>& instance,
-               const std::vector<std::tuple<int, int, double>>& edges){
+            [](Statistics<double> &instance,
+               const std::vector<std::tuple<int, int, double>> &edges){
                 for(const auto& [u, v, weight] : edges){
                     instance.add_edge(u, v, weight);
                 }

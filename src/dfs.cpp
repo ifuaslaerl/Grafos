@@ -34,7 +34,7 @@ public:
     }
 
     bool should_run(int n, int m) const override{
-        return static_cast<long long>(n) + m <= this->operation_budget;
+        return (ll)n + m <= this->operation_budget;
     }
 
     void dfs(int v, int p){
@@ -97,6 +97,11 @@ public:
         reset();
         traverse_component(s);
         return dist[t];
+    }
+
+    vector<int> get_path(int s, int t) override{
+        get_dist(s, t);
+        return reconstruct_path(s, t, dist, pai, inf);
     }
 
     vector<vector<int>> get_components() const {

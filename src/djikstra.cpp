@@ -38,8 +38,8 @@ public:
     }
 
     bool should_run(int n, int m) const override{
-        const int log_n = static_cast<int>(floor(log2(n)));
-        return static_cast<long long>(n) * log_n + m
+        const int log_n = (int)floor(log2(n));
+        return (ll)n * log_n + m
             <= this->operation_budget;
     }
 
@@ -110,6 +110,11 @@ public:
         reset();
         go(s);
         return dist[t];
+    }
+
+    vector<int> get_path(int s, int t) override{
+        get_dist(s, t);
+        return reconstruct_path(s, t, dist, pai, inf);
     }
 
     vector<vector<int>> get_components() const {

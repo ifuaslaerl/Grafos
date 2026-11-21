@@ -13,14 +13,14 @@ public:
     const T inf = numeric_limits<T>::max();
     vector<int> pai;
     vector<T> dist;
-    vector<vector<unsigned char>> adj;
+    vector<vector<int>> adj;
     vector<vector<int>> connected_components;
 
     MatrixDfs(int n_):
         n(n_),
         pai(n_ + 1),
         dist(n_ + 1, inf),
-        adj(n_ + 1, vector<unsigned char>(n_ + 1))
+        adj(n_ + 1, vector<int>(n_ + 1))
     {}
 
     void reset(){
@@ -35,12 +35,12 @@ public:
     }
 
     bool should_run(int n, int) const override{
-        return static_cast<__int128>(n) * n <= this->operation_budget;
+        return (__int128)n * n <= this->operation_budget;
     }
 
-    void dfs(int v, int parent){
-        pai[v] = parent;
-        dist[v] = dist[parent] + 1;
+    void dfs(int v, int p){
+        pai[v] = p;
+        dist[v] = dist[p] + 1;
         connected_components.back().push_back(v);
 
         for(int u=1; u<=n; u++){
@@ -49,15 +49,15 @@ public:
         }
     }
 
-    void traverse_component(int source){
+    void traverse_component(int s){
         connected_components.emplace_back();
-        dist[source] = -1;
-        dfs(source, source);
+        dist[s] = -1;
+        dfs(s, s);
     }
 
-    void run(int source=1) override{
+    void run(int s=1) override{
         reset();
-        traverse_component(source);
+        traverse_component(s);
 
         for(int v=1; v<=n; v++){
             if(dist[v] != inf) continue;
@@ -65,19 +65,19 @@ public:
         }
 
         sort(connected_components.begin(), connected_components.end(),
-            [](const vector<int>& lhs, const vector<int>& rhs){
-                return lhs.size() > rhs.size();
+            [](const vector<int> &a, const vector<int> &b){
+                return a.size() > b.size();
             }
         );
     }
 
-    void run_from(int source){
+    void run_from(int s){
         reset();
-        traverse_component(source);
+        traverse_component(s);
     }
 
-    T get_aprox_diameter(int source=1){
-        int v = source;
+    T get_aprox_diameter(int s=1){
+        int v = s;
         reset();
         traverse_component(v);
         for(int u=1; u<=n; u++){
@@ -95,10 +95,15 @@ public:
         return dist[v];
     }
 
-    T get_dist(int source, int target){
+    T get_dist(int s, int t){
         reset();
-        traverse_component(source);
-        return dist[target];
+        traverse_component(s);
+        return dist[t];
+    }
+
+    vector<int> get_path(int s, int t) override{
+        get_dist(s, t);
+        return reconstruct_path(s, t, dist, pai, inf);
     }
 
     vector<vector<int>> get_components() const{
