@@ -4,6 +4,9 @@
 #include "djikstra.cpp"
 #include "floyd_warshall.cpp"
 #include "graph_reader.hpp"
+#include "matrix_bfs.cpp"
+#include "matrix_dfs.cpp"
+#include "matrix_djikstra.cpp"
 #include "run_measurement.hpp"
 
 #include <algorithm>
@@ -260,6 +263,18 @@ int main(int argc, char* argv[]){
             );
             benchmark_algorithm<Djikstra<double>, double>(
                 output, "Djikstra<double>", graph, graph_index,
+                graphs.size(), false
+            );
+            benchmark_algorithm<MatrixBfs<int>, int>(
+                output, "MatrixBfs<int>", graph, graph_index,
+                graphs.size(), true
+            );
+            benchmark_algorithm<MatrixDfs<int>, int>(
+                output, "MatrixDfs<int>", graph, graph_index,
+                graphs.size(), true
+            );
+            benchmark_algorithm<MatrixDjikstra<double>, double>(
+                output, "MatrixDjikstra<double>", graph, graph_index,
                 graphs.size(), false
             );
             benchmark_algorithm<BellmanFord<double>, double>(

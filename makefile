@@ -12,7 +12,10 @@ PIPE_SOURCES = \
 	src/dfs.cpp \
 	src/djikstra.cpp \
 	src/bellman_ford.cpp \
-	src/floyd_warshall.cpp
+	src/floyd_warshall.cpp \
+	src/matrix_bfs.cpp \
+	src/matrix_dfs.cpp \
+	src/matrix_djikstra.cpp
 
 all: pipe
 

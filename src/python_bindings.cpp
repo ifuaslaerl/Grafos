@@ -3,6 +3,9 @@
 #include "dfs.cpp"
 #include "djikstra.cpp"
 #include "floyd_warshall.cpp"
+#include "matrix_bfs.cpp"
+#include "matrix_dfs.cpp"
+#include "matrix_djikstra.cpp"
 #include "statistics.cpp"
 
 #include <pybind11/pybind11.h>
@@ -115,7 +118,9 @@ void bind_algorithm(py::module_& module, const char* name){
     }
 
     if constexpr(std::is_same_v<Algorithm, Bfs<int>> ||
-                 std::is_same_v<Algorithm, Dfs<int>>){
+                 std::is_same_v<Algorithm, Dfs<int>> ||
+                 std::is_same_v<Algorithm, MatrixBfs<int>> ||
+                 std::is_same_v<Algorithm, MatrixDfs<int>>){
         algorithm
             .def(
                 "run_from",
@@ -141,6 +146,11 @@ PYBIND11_MODULE(grafos, module){
     bind_algorithm<Djikstra<double>, double>(module, "Dijkstra");
     bind_algorithm<BellmanFord<double>, double>(module, "BellmanFord");
     bind_algorithm<FloydWarshall<double>, double>(module, "FloydWarshall");
+    bind_algorithm<MatrixBfs<int>, int>(module, "MatrixBFS");
+    bind_algorithm<MatrixDfs<int>, int>(module, "MatrixDFS");
+    bind_algorithm<MatrixDjikstra<double>, double>(
+        module, "MatrixDijkstra"
+    );
 
     py::class_<Statistics<double>>(module, "Statistics")
         .def(py::init<int>(), py::arg("vertex_count"))
