@@ -6,8 +6,8 @@
 #include "graph_reader.hpp"
 #include "matrix_bfs.cpp"
 #include "matrix_dfs.cpp"
-#include "matrix_djikstra.cpp"
 #include "run_measurement.hpp"
+#include "vector_djikstra.cpp"
 
 #include <algorithm>
 #include <array>
@@ -273,8 +273,8 @@ int main(int argc, char* argv[]){
                 output, "MatrixDfs<int>", graph, graph_index,
                 graphs.size(), true
             );
-            benchmark_algorithm<MatrixDjikstra<double>, double>(
-                output, "MatrixDjikstra<double>", graph, graph_index,
+            benchmark_algorithm<VectorDjikstra<double>, double>(
+                output, "VectorDjikstra<double>", graph, graph_index,
                 graphs.size(), false
             );
             benchmark_algorithm<BellmanFord<double>, double>(

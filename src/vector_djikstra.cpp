@@ -2,25 +2,26 @@
 
 #include <algorithm>
 #include <limits>
+#include <utility>
 #include <vector>
 
 using namespace std;
 
 template<typename T>
-class MatrixDjikstra: public ISingleSourceAlgorithm<T>{
+class VectorDjikstra: public ISingleSourceAlgorithm<T>{
 public:
     int n;
     const T inf = numeric_limits<T>::max();
     vector<T> dist;
     vector<int> pai;
-    vector<vector<T>> adj;
+    vector<vector<pair<int, T>>> adj;
     vector<vector<int>> connected_components;
 
-    MatrixDjikstra(int n_):
+    VectorDjikstra(int n_):
         n(n_),
         dist(n_ + 1, inf),
         pai(n_ + 1),
-        adj(n_ + 1, vector<T>(n_ + 1, inf))
+        adj(n_ + 1)
     {}
 
     void reset(){
@@ -30,11 +31,12 @@ public:
     }
 
     void add_edge(int u, int v, T w=1) override{
-        adj[u][v] = min(adj[u][v], w);
+        adj[u].push_back({v, w});
     }
 
-    bool should_run(int n, int) const override{
-        return static_cast<__int128>(n) * n <= this->operation_budget;
+    bool should_run(int n, int m) const override{
+        return static_cast<__int128>(n) * n + m
+            <= this->operation_budget;
     }
 
     void go(int source){
@@ -43,7 +45,7 @@ public:
         dist[source] = 0;
         pai[source] = source;
 
-        for(int step=0; step<n; step++){
+        for(int i=0; i<n; i++){
             int v = 0;
             for(int candidate=1; candidate<=n; candidate++){
                 if(visited[candidate] || dist[candidate] == inf) continue;
@@ -53,19 +55,17 @@ public:
 
             visited[v] = 1;
             connected_components.back().push_back(v);
-            for(int u=1; u<=n; u++){
-                if(adj[v][u] == inf || dist[v] + adj[v][u] >= dist[u]){
-                    continue;
-                }
-                dist[u] = dist[v] + adj[v][u];
+            for(const auto &[u, w]: adj[v]){
+                if(dist[v] + w >= dist[u]) continue;
+                dist[u] = dist[v] + w;
                 pai[u] = v;
             }
         }
     }
 
-    void run(int source=1) override{
+    void run(int s=1) override{
         reset();
-        go(source);
+        go(s);
 
         for(int v=1; v<=n; v++){
             if(dist[v] != inf) continue;
@@ -73,8 +73,8 @@ public:
         }
 
         sort(connected_components.begin(), connected_components.end(),
-            [](const vector<int>& lhs, const vector<int>& rhs){
-                return lhs.size() > rhs.size();
+            [](const vector<int>& a, const vector<int>& b){
+                return a.size() > b.size();
             }
         );
     }

@@ -15,7 +15,7 @@ PIPE_SOURCES = \
 	src/floyd_warshall.cpp \
 	src/matrix_bfs.cpp \
 	src/matrix_dfs.cpp \
-	src/matrix_djikstra.cpp
+	src/vector_djikstra.cpp
 
 all: pipe
 

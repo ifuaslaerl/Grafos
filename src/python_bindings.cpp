@@ -5,8 +5,8 @@
 #include "floyd_warshall.cpp"
 #include "matrix_bfs.cpp"
 #include "matrix_dfs.cpp"
-#include "matrix_djikstra.cpp"
 #include "statistics.cpp"
+#include "vector_djikstra.cpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -148,8 +148,8 @@ PYBIND11_MODULE(grafos, module){
     bind_algorithm<FloydWarshall<double>, double>(module, "FloydWarshall");
     bind_algorithm<MatrixBfs<int>, int>(module, "MatrixBFS");
     bind_algorithm<MatrixDfs<int>, int>(module, "MatrixDFS");
-    bind_algorithm<MatrixDjikstra<double>, double>(
-        module, "MatrixDijkstra"
+    bind_algorithm<VectorDjikstra<double>, double>(
+        module, "VectorDijkstra"
     );
 
     py::class_<Statistics<double>>(module, "Statistics")
