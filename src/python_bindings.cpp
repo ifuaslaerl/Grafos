@@ -118,6 +118,38 @@ void bind_algorithm(py::module_ &module, const char* name){
             );
     }
 
+    if constexpr(std::is_same_v<Algorithm, BellmanFord<Weight>>){
+        algorithm
+            .def(
+                "should_run_all_pairs",
+                [](const Algorithm &instance, int vertex_count,
+                   int edge_count){
+                    return instance.should_run_all_pairs(
+                        vertex_count, edge_count
+                    );
+                },
+                py::arg("vertex_count"),
+                py::arg("edge_count")
+            )
+            .def("run_all_pairs", &Algorithm::run_all_pairs)
+            .def(
+                "get_all_dist",
+                [](const Algorithm &instance, int s, int t){
+                    return instance.get_all_dist(s, t);
+                },
+                py::arg("source"),
+                py::arg("target")
+            )
+            .def(
+                "get_all_path",
+                [](const Algorithm &instance, int s, int t){
+                    return instance.get_all_path(s, t);
+                },
+                py::arg("source"),
+                py::arg("target")
+            );
+    }
+
     if constexpr(std::is_base_of_v<INegativeCycleDetector, Algorithm>){
         algorithm.def(
             "has_negative_cycle",

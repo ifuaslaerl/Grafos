@@ -24,6 +24,10 @@ public:
     vector<Edge> edges;
     vector<int> pai;
     vector<T> dist;
+    // Origem cujo resultado está em dist/pai (0 = nenhuma).
+    int cached_source = 0;
+    vector<vector<T>> all_dist;
+    vector<vector<int>> all_pai;
 
     BellmanFord(int n_): 
         n(n_), 
@@ -32,15 +36,23 @@ public:
         dist(n_+1, inf)
     {} 
 
-    void reset(){
+    void clear_state(){
         fill(pai.begin(), pai.end(), 0);
         fill(dist.begin(), dist.end(), inf);
         negative_cicle = false;
+        cached_source = 0;
+    }
+
+    void reset(){
+        clear_state();
         this->zerar_contador();
     }
 
     void add_edge(int u, int v, T w=1) override{
         edges.push_back(Edge(u, v, w));
+        cached_source = 0;
+        all_dist.clear();
+        all_pai.clear();
     }
 
     bool should_run(int n, int m) const override{
@@ -51,10 +63,42 @@ public:
         );
     }
 
+    bool should_run_all_pairs(int n, int m) const{
+        const __int128 vertices = (__int128)n + 1;
+        return this->fits_memory(
+            vertices * (sizeof(T) + sizeof(int)) +
+            (__int128)m * sizeof(Edge) +
+            vertices * vertices * (sizeof(T) + sizeof(int))
+        );
+    }
+
     void run(int s=1) override{
         reset();
+        solve(s);
+    }
+
+    // Executa a partir de todas as origens acumulando o contador de iterações.
+    void run_all_pairs(){
+        reset();
+        all_dist.assign(n+1, vector<T>());
+        all_pai.assign(n+1, vector<int>());
+        bool any_negative_cycle = false;
+        for(int s=1; s<=n; s++){
+            clear_state();
+            solve(s);
+            all_dist[s] = dist;
+            all_pai[s] = pai;
+            any_negative_cycle = any_negative_cycle || negative_cicle;
+            if(this->limite_excedido) break;
+        }
+        negative_cicle = any_negative_cycle;
+        cached_source = 0;
+    }
+
+    void solve(int s){
         dist[s] = 0;
         pai[s] = s;
+        cached_source = s;
 
         for(int k=1; k<=n; k++){
             bool mudou=false;
@@ -92,9 +136,23 @@ public:
     }
 
     T get_dist(int s, int t){
-        reset();
-        run(s);
+        if(cached_source != s) run(s);
         return dist[t];
+    }
+
+    // Requer run_all_pairs(); origens não processadas retornam inf.
+    T get_all_dist(int s, int t) const{
+        if(s < 1 || s > n || all_dist.empty() || all_dist[s].empty()){
+            return inf;
+        }
+        return all_dist[s][t];
+    }
+
+    vector<int> get_all_path(int s, int t) const{
+        if(s < 1 || s > n || all_dist.empty() || all_dist[s].empty()){
+            return {};
+        }
+        return reconstruct_path(s, t, all_dist[s], all_pai[s], inf);
     }
 
     vector<int> get_path(int s, int t) override{
