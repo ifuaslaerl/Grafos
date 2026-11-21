@@ -12,7 +12,7 @@ template<typename T>
 class Statistics {
 private:
     template<typename Val>
-    void calc(vector<Val>& vals, Val& vmin, Val& vmax, ld& vmean, ld& vmedian) {
+    void calc(vector<Val>& vals, Val& vmin, Val& vmax, ld& vmean, ld& vmedian){
         if (n <= 0) return;
 
         int active = vals.size();
@@ -35,7 +35,7 @@ private:
             return vals[idx];
         };
 
-        if (n % 2 == 1) {
+        if (n % 2 == 1){
             vmedian = get_kth(n / 2);
         } else {
             Val m1 = get_kth(n / 2 - 1);
@@ -51,14 +51,14 @@ public:
     unordered_map<int, int> deg;
     unordered_map<int, T> degW;
 
-    Statistics(int n_) : n(n_) {}
+    Statistics(int n_) : n(n_){}
 
-    void add_edge(int u, int v, T w = 1) {
+    void add_edge(int u, int v, T w = 1){
         deg[u]++; deg[v]++;
         degW[u] += w; degW[v] += w;
     }
 
-    void run() {
+    void run(){
         vector<int> g;
         g.reserve(deg.size());
         for (auto& [u, d] : deg) g.push_back(d);

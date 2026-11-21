@@ -15,7 +15,7 @@ public:
     struct Edge{
         int u, v;
         T w;
-        Edge(int u_, int v_, T w_): u(u_), v(v_), w(w_) {}
+        Edge(int u_, int v_, T w_): u(u_), v(v_), w(w_){}
     };
 
     int n;
