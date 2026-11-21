@@ -32,6 +32,8 @@ namespace{
 constexpr int repetitions = 10;
 constexpr size_t p2_sample_size = 100;
 constexpr unsigned int p2_sample_seed = 42;
+constexpr size_t p1_sample_size = 100;
+constexpr unsigned int p1_sample_seed = 42;
 
 struct GraphInput{
     filesystem::path path;
@@ -382,6 +384,102 @@ void benchmark_p2_samples(
     }
 }
 
+bool is_p1_graph(const GraphInput& graph){
+    const string stem = graph.path.stem().string();
+    const string prefix = "grafo_";
+    return stem.rfind(prefix, 0) == 0 && stem.size() > prefix.size() &&
+        all_of(stem.begin() + prefix.size(), stem.end(), [](char character){
+            return character >= '0' && character <= '9';
+        });
+}
+
+// P1: memória após carregar o grafo e buscas a partir de origens distintas.
+template<typename Algorithm>
+void benchmark_p1_searches(
+    ostream& output,
+    const string& name,
+    const GraphInput& graph,
+    const vector<int>& sources
+){
+    const size_t arc_count = graph.input_edges * 2;
+    const int estimated_arc_count = arc_count >
+            static_cast<size_t>(numeric_limits<int>::max())
+        ? numeric_limits<int>::max()
+        : static_cast<int>(arc_count);
+
+    const auto write_row = [&](const string& measurement, size_t repetition,
+                               int source, const string& run_ns,
+                               const string& rss, const string& status){
+        output << name << ','
+               << csv_quote(graph.path.filename().string())
+               << ",undirected," << repetition << ','
+               << graph.vertex_count << ',' << graph.input_edges << ','
+               << arc_count << ',' << run_ns << ',' << rss << ',' << status
+               << ',' << measurement << ',' << source << ','
+               << sources.size() << ',' << p1_sample_seed << '\n';
+    };
+
+    if(!Algorithm(0).should_run(graph.vertex_count, estimated_arc_count)){
+        write_row("p1_load_memory", 0, 0, "", "", "skipped_memory_budget");
+        write_row("p1_single_source", 0, 0, "", "",
+                  "skipped_memory_budget");
+        cerr << "[benchmark] Ignorando P1 de " << name << " | "
+             << graph.path.filename() << ": estimativa de memoria excede "
+             << IAlgorithm<int>::memory_budget << " bytes.\n";
+        return;
+    }
+
+    const auto load = [&graph](Algorithm& algorithm){
+        ifstream input(graph.path);
+        if(!input){
+            throw runtime_error("Nao foi possivel abrir " +
+                                graph.path.string() + ".");
+        }
+        const graph_io::Header header = graph_io::read_header(input);
+        if(header.vertex_count != graph.vertex_count ||
+           header.edge_count != graph.input_edges){
+            throw runtime_error("O numero de vertices mudou em " +
+                                graph.path.string() + ".");
+        }
+        graph_io::read_edges<int>(
+            input,
+            algorithm,
+            graph.vertex_count,
+            graph.weight_format,
+            graph_io::GraphDirection::undirected,
+            graph.input_edges
+        );
+    };
+
+    cerr << "[benchmark] P1 " << name << " | " << graph.path.filename()
+         << ": medindo memoria de carga.\n";
+    const performance::RunMeasurement memory =
+        performance::measure_run([&]{
+            Algorithm algorithm(graph.vertex_count);
+            load(algorithm);
+        });
+    write_row("p1_load_memory", 0, 0, "",
+              to_string(memory.peak_rss_delta_bytes), "ok");
+
+    Algorithm algorithm(graph.vertex_count);
+    load(algorithm);
+    for(size_t index = 0; index < sources.size(); ++index){
+        const int source = sources[index];
+        cerr << "[benchmark] P1 " << index + 1 << '/' << sources.size()
+             << " | " << name << " | " << graph.path.filename()
+             << " | origem " << source << ".\n";
+        const auto start = chrono::steady_clock::now();
+        algorithm.get_dist(source, source);
+        const auto end = chrono::steady_clock::now();
+        const auto elapsed = chrono::duration_cast<chrono::nanoseconds>(
+            end - start
+        ).count();
+        write_row("p1_single_source", index + 1, source,
+                  to_string(elapsed), "",
+                  algorithm.limite_excedido ? "iteration_limit" : "ok");
+    }
+}
+
 }
 
 int main(int argc, char* argv[]){
@@ -397,6 +495,7 @@ int main(int argc, char* argv[]){
         const filesystem::path output_path =
             argc == 3 ? argv[2] : "Dados/benchmark.csv";
         mt19937 p2_random(p2_sample_seed);
+        mt19937 p1_random(p1_sample_seed);
         cerr << "[benchmark] Listando grafos em " << input_directory << "...\n";
         const vector<GraphInput> graphs = list_graphs(input_directory);
         cerr << "[benchmark] Encontrados " << graphs.size()
@@ -448,6 +547,23 @@ int main(int argc, char* argv[]){
                 output, "FloydWarshall<double>", graph, graph_index,
                 graphs.size(), false
             );
+            if(is_p1_graph(graph)){
+                const vector<int> sources = choose_sources(
+                    graph.vertex_count, p1_sample_size, p1_random
+                );
+                benchmark_p1_searches<Bfs<int>>(
+                    output, "Bfs<int>", graph, sources
+                );
+                benchmark_p1_searches<Dfs<int>>(
+                    output, "Dfs", graph, sources
+                );
+                benchmark_p1_searches<MatrixBfs<int>>(
+                    output, "MatrixBfs<int>", graph, sources
+                );
+                benchmark_p1_searches<MatrixDfs<int>>(
+                    output, "MatrixDfs<int>", graph, sources
+                );
+            }
             if(graph.path.filename().string().rfind("grafo_W_", 0) == 0){
                 const vector<int> sources = choose_sources(
                     graph.vertex_count, p2_sample_size, p2_random
