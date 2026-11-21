@@ -564,7 +564,8 @@ int main(int argc, char* argv[]){
                     output, "MatrixDfs<int>", graph, sources
                 );
             }
-            if(graph.path.filename().string().rfind("grafo_W_", 0) == 0){
+            if(graph.path.filename().string().rfind("grafo_W_", 0) == 0 ||
+               graph.path.filename() == "rede_colaboracao.txt"){
                 const vector<int> sources = choose_sources(
                     graph.vertex_count, p2_sample_size, p2_random
                 );
