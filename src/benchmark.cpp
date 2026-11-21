@@ -149,19 +149,19 @@ void benchmark_algorithm(
         }
         const size_t arc_count = graph.input_edges * multiplier;
         const int estimated_arc_count = arc_count >
-                static_cast<size_t>(IAlgorithm<T>::operation_budget)
-            ? IAlgorithm<T>::operation_budget + 1
+                static_cast<size_t>(numeric_limits<int>::max())
+            ? numeric_limits<int>::max()
             : static_cast<int>(arc_count);
         if(!eligibility_probe.should_run(
                graph.vertex_count, estimated_arc_count
            )){
-            const string reason = "cost_estimate";
+            const string reason = "memory_estimate";
             cerr << "[benchmark] Ignorando " << name << " | "
                  << graph.path.filename() << " | "
                  << direction_name(direction) << " (n="
                  << graph.vertex_count << ", arcos=" << arc_count
-                 << "): estimativa de custo excede "
-                 << IAlgorithm<T>::operation_budget << ".\n";
+                 << "): estimativa de memoria excede "
+                 << IAlgorithm<T>::memory_budget << " bytes.\n";
             print_skipped(
                 output, name, graph, direction, arc_count, reason
             );
@@ -297,10 +297,10 @@ void benchmark_p2_samples(
     };
 
     if(!probe.should_run(graph.vertex_count, estimated_arc_count)){
-        write_row(0, 0, "", "skipped_operation_budget");
+        write_row(0, 0, "", "skipped_memory_budget");
         cerr << "[benchmark] Ignorando amostras P2 de " << name << " | "
-             << graph.path.filename() << ": estimativa de custo excede "
-             << IAlgorithm<double>::operation_budget << ".\n";
+             << graph.path.filename() << ": estimativa de memoria excede "
+             << IAlgorithm<double>::memory_budget << " bytes.\n";
         return;
     }
 

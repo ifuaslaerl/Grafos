@@ -9,7 +9,14 @@ typedef long long ll;
 template<typename T>
 class IAlgorithm{
 public:
+    // Limite de tempo: iterações contadas por contar().
     static constexpr int operation_budget = 15e8;
+    // Limite de memória (bytes) usado por should_run().
+    static constexpr ll memory_budget = 6LL << 30;
+
+    static bool fits_memory(__int128 bytes){
+        return bytes <= memory_budget;
+    }
 
     ll cont = 0;
     bool limite_excedido = false;
@@ -30,6 +37,7 @@ public:
     virtual ~IAlgorithm() = default;
 
     virtual void add_edge(int u, int v, T w=1) = 0;
+    // Estima a memória necessária para n vértices e m arcos.
     virtual bool should_run(int n, int m) const = 0;
 };
 

@@ -40,7 +40,7 @@ def collect(spec):
     if not grafos.FloydWarshall(0).should_run(n, arcs):
         result["floyd_warshall_pairs"] = {
             "status": "skipped",
-            "reason": "algorithm_operation_budget",
+            "reason": "algorithm_memory_budget",
         }
         result["floyd_warshall_negative_cycle"] = None
     else:

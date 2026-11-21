@@ -251,11 +251,11 @@ def timing_result(
     if not algorithm.should_run(n, m):
         print(
             f"[P2] {graph_name}: {algorithm_name} ignorado por "
-            "should_run() (orçamento de operações).",
+            "should_run() (orçamento de memória).",
             file=sys.stderr,
         )
         return {
-            "status": "skipped_operation_budget",
+            "status": "skipped_memory_budget",
             "requested_samples": sample_size,
             "runs": 0,
         }
@@ -381,7 +381,7 @@ def collect(spec, sample_size, rng, benchmark, sampled_benchmark):
                 file=sys.stderr,
             )
             result["researcher_paths"] = {
-                "status": "skipped_operation_budget"
+                "status": "skipped_memory_budget"
             }
         return result
 
@@ -400,7 +400,7 @@ def collect(spec, sample_size, rng, benchmark, sampled_benchmark):
         result["source_10_paths"] = {"status": "source_out_of_range"}
     elif heap is None:
         result["source_10_paths"] = {
-            "status": "skipped_operation_budget"
+            "status": "skipped_memory_budget"
         }
     else:
         if n < 10:
@@ -412,7 +412,7 @@ def collect(spec, sample_size, rng, benchmark, sampled_benchmark):
             )
         elif heap is None:
             result["source_10_paths"] = {
-                "status": "skipped_operation_budget"
+                "status": "skipped_memory_budget"
             }
             print(
                 f"[P2] {spec.path.name}: caminhos da origem 10 ignorados "
@@ -442,7 +442,7 @@ def collect(spec, sample_size, rng, benchmark, sampled_benchmark):
             file=sys.stderr,
         )
         result["Dijkstra_heap"] = {
-            "status": "skipped_operation_budget",
+            "status": "skipped_memory_budget",
             "requested_samples": sample_size,
             "runs": 0,
         }
@@ -487,11 +487,11 @@ def collect(spec, sample_size, rng, benchmark, sampled_benchmark):
     elif not vector_probe.should_run(n, m):
         print(
             f"[P2] {spec.path.name}: Dijkstra vetor ignorado por "
-            "should_run() (orçamento de operações).",
+            "should_run() (orçamento de memória).",
             file=sys.stderr,
         )
         result["Dijkstra_vector"] = {
-            "status": "skipped_operation_budget",
+            "status": "skipped_memory_budget",
             "requested_samples": sample_size,
             "runs": 0,
         }

@@ -35,7 +35,13 @@ public:
     }
 
     bool should_run(int n, int m) const override{
-        return (ll)n + m <= this->operation_budget;
+        const __int128 vertices = (__int128)n + 1;
+        const __int128 frame = 64;
+        return this->fits_memory(
+            vertices * (sizeof(vector<int>) + 3 * sizeof(int) + sizeof(T) +
+                        frame) +
+            (__int128)m * sizeof(int)
+        );
     }
 
     void dfs(int v, int p){
