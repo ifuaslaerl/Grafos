@@ -142,6 +142,33 @@ def load_algorithm(spec: GraphSpec, algorithm_type):
     return algorithm
 
 
+def load_statistics(spec: GraphSpec):
+    n, declared_m = header(spec)
+    statistics = grafos.Statistics(n)
+    batch = []
+    m = 0
+
+    def flush():
+        if batch:
+            statistics.add_edges(batch)
+            batch.clear()
+
+    for u, v, weight in iter_edges(spec):
+        batch.append((u, v, weight))
+        m += 1
+        if len(batch) >= CHUNK_SIZE:
+            flush()
+    flush()
+
+    if declared_m is not None and m != declared_m:
+        raise ValueError(
+            f"{spec.path}: cabeçalho declara {declared_m} arestas, "
+            f"mas foram lidas {m}"
+        )
+    statistics.run()
+    return statistics
+
+
 def distance(value):
     if isinstance(value, float):
         if not math.isfinite(value) or value >= sys.float_info.max:

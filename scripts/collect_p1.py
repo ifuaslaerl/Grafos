@@ -10,8 +10,10 @@ import grafos
 from study_common import (
     OUTPUT,
     GraphSpec,
+    distance,
     inspect_graph,
     load_algorithm,
+    load_statistics,
     select_graphs,
     specs_p1,
     write_jsonl,
@@ -21,51 +23,54 @@ from study_common import (
 def collect(spec: GraphSpec):
     info = inspect_graph(spec)
     n = info["vertices"]
+    statistics = load_statistics(spec)
     result = {
         "part": "P1",
         "graph": spec.path.name,
         "performance_data_source": "Dados/benchmark.csv",
         "summary": info,
         "degree_statistics": {
-            "status": "unavailable",
-            "reason": "src_does_not_expose_degree_statistics",
+            "min": statistics.degree_min,
+            "max": statistics.degree_max,
+            "mean": statistics.degree_mean,
+            "median": statistics.degree_median,
         },
     }
 
     bfs = load_algorithm(spec, grafos.BFS)
     bfs.run(1)
+    components = bfs.get_components()
     result["components"] = {
-        "status": "unavailable",
-        "reason": "src_does_not_expose_component_query",
+        "count": len(components),
+        "sizes": [len(component) for component in components],
+        "vertices": components,
     }
-    result["diameter_approximation"] = {
-        "status": "pending_src_implementation",
-        "reason": "waiting_for_approximate_diameter_api",
-    }
+    result["diameter_approximation"] = distance(
+        bfs.get_aprox_diameter(1)
+    )
 
     result["parents"] = {}
     for source in (1, 2, 3):
         if source > n:
             continue
-        if source == 1:
-            tree = bfs.get_tree()
-            result["parents"][str(source)] = {
-                str(target): tree[target] or None
-                for target in (10, 20, 30)
-                if target <= n
-            }
-        else:
-            result["parents"][str(source)] = {
-                "status": "pending_src_api",
-                "reason": "source_specific_rerun_requires_state_reset_or_reuse",
-            }
+        bfs.run_from(source)
+        tree = bfs.get_tree()
+        distances = bfs.get_dists()
+        result["parents"][str(source)] = {
+            str(target): (
+                tree[target] or None
+                if distance(distances[target]) is not None
+                else None
+            )
+            for target in (10, 20, 30)
+            if target <= n
+        }
 
     result["pair_distances"] = {}
     for source, target in ((10, 20), (10, 30), (20, 30)):
-        result["pair_distances"][f"{source}-{target}"] = {
-            "status": "unavailable",
-            "reason": "src_does_not_expose_pair_distance_query",
-        }
+        result["pair_distances"][f"{source}-{target}"] = distance(
+            bfs.get_dist(source, target)
+        )
 
     return result
 
