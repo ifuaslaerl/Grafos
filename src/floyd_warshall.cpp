@@ -7,13 +7,16 @@
 using namespace std;
 
 template<typename T>
-class FloydWarshall: public IAlgorithm<T>{
+class FloydWarshall:
+    public IAllPairsAlgorithm<T>,
+    public INegativeCycleDetector{
 public:
     int n;
     bool negative_cicle;
     const T inf = numeric_limits<T>::max();
     vector<vector<T>> dist;
     vector<vector<int>> pai;
+    T diameter = numeric_limits<T>::min();
 
     FloydWarshall(int n_): 
         n(n_),
@@ -37,8 +40,7 @@ public:
             <= this->operation_budget;
     }
 
-    void run(int s=1) override{
-        (void)s;
+    void run() override{
         for(int k=1; k<=n; k++){
             for(int i=1; i<=n; i++){
                 for(int j=1; j<=n; j++){
@@ -48,6 +50,7 @@ public:
                         dist[i][j] = dist[i][k] + dist[k][j];
                         pai[i][j] = pai[k][j];
                     }
+                    diameter = max(diameter, dist[i][j]);
                 }
             }
 
@@ -59,8 +62,10 @@ public:
         }
     }
 
-    vector<T> get_dists(int s=1) const override {return dist[s];}
-    vector<int> get_tree(int s=1) const override {return pai[s];}
+    T get_aprox_diameter(int s=1){ return diameter; }
+    T get_dist(int s, int t) const override {return dist[s][t];}
+    vector<T> get_dists(int s) const override {return dist[s];}
+    vector<int> get_tree(int s) const override {return pai[s];}
     bool has_negative_cycle() const override {return negative_cicle;}
 
 };

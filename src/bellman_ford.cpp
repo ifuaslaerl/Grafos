@@ -1,12 +1,15 @@
 #include "algorithm.hpp"
 
+#include <algorithm>
 #include <limits>
 #include <vector>
 
 using namespace std;
 
 template<typename T>
-class BellmanFord: public IAlgorithm<T>{
+class BellmanFord:
+    public ISingleSourceAlgorithm<T>,
+    public INegativeCycleDetector{
 public:
 
     struct Edge{
@@ -29,6 +32,12 @@ public:
         dist(n_+1, inf)
     {} 
 
+    void reset(){
+        fill(pai.begin(), pai.end(), 0);
+        fill(dist.begin(), dist.end(), inf);
+        negative_cicle = false;
+    }
+
     void add_edge(int u, int v, T w=1) override{
         edges.push_back(Edge(u, v, w));
     }
@@ -39,6 +48,7 @@ public:
     }
 
     void run(int s=1) override{
+        reset();
         dist[s] = 0;
         pai[s] = s;
 
@@ -54,13 +64,36 @@ public:
         }
     }
 
-    vector<T> get_dists(int s=1) const override {
-        (void)s;
+    T get_aprox_diameter(int s=1){
+        int v=s;
+        reset();
+        run(v);
+        for(int u=1; u<=n; u++){
+            if(dist[u] == inf) continue;
+            if(dist[u] > dist[v]) v = u;
+        }
+
+        reset();
+        run(v);
+        for(int u=1; u<=n; u++){
+            if(dist[u] == inf) continue;
+            if(dist[u] > dist[v]) v = u;
+        }
+
+        return dist[v];
+    }
+
+    T get_dist(int s, int t){
+        reset();
+        run(s);
+        return dist[t];
+    }
+
+    vector<T> get_dists() const override {
         return dist;
     }
 
-    vector<int> get_tree(int s=1) const override {
-        (void)s;
+    vector<int> get_tree() const override {
         return pai;
     }
 

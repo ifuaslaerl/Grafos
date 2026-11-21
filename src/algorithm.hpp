@@ -15,10 +15,29 @@ public:
 
     virtual void add_edge(int u, int v, T w=1) = 0;
     virtual bool should_run(int n, int m) const = 0;
-    virtual void run(int s=1) = 0;
-    virtual vector<T> get_dists(int s=1) const = 0;
-    virtual vector<int> get_tree(int s=1) const = 0;
-    virtual bool has_negative_cycle() const {return false;}
+};
+
+template<typename T>
+class ISingleSourceAlgorithm : public IAlgorithm<T>{
+public:
+    virtual void run(int source) = 0;
+    virtual vector<T> get_dists() const = 0;
+    virtual vector<int> get_tree() const = 0;
+};
+
+template<typename T>
+class IAllPairsAlgorithm : public IAlgorithm<T>{
+public:
+    virtual void run() = 0;
+    virtual T get_dist(int source, int target) const = 0;
+    virtual vector<T> get_dists(int source) const = 0;
+    virtual vector<int> get_tree(int source) const = 0;
+};
+
+class INegativeCycleDetector{
+public:
+    virtual ~INegativeCycleDetector() = default;
+    virtual bool has_negative_cycle() const = 0;
 };
 
 #endif

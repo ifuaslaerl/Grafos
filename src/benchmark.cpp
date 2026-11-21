@@ -255,7 +255,7 @@ int main(int argc, char* argv[]){
             benchmark_algorithm<Bfs<int>, int>(
                 output, "Bfs<int>", graph, graph_index, graphs.size(), true
             );
-            benchmark_algorithm<Dfs, int>(
+            benchmark_algorithm<Dfs<int>, int>(
                 output, "Dfs", graph, graph_index, graphs.size(), true
             );
             benchmark_algorithm<Djikstra<double>, double>(

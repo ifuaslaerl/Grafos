@@ -1,25 +1,35 @@
 #include "algorithm.hpp"
 
+#include <algorithm>
 #include <limits>
 #include <vector>
 
 using namespace std;
 
-class Dfs: public IAlgorithm<int>{
+template<typename T>
+class Dfs: public ISingleSourceAlgorithm<T>{
 public:
     int n;
-    const int inf = numeric_limits<int>::max();
-    vector<int> pai, dist;
-    vector<vector<int>> adj;
+    const T inf = numeric_limits<T>::max();
+    vector<int> pai;
+    vector<T> dist;
+    vector<vector<int>> adj, connected_components;
 
-    Dfs(int n_): 
-        n(n_), 
-        pai(n_+1), 
-        dist(n_+1, inf), 
-        adj(n_+1) 
-    {} 
+    Dfs(int n_):
+        n(n_),
+        pai(n_ + 1),
+        dist(n_ + 1, inf),
+        adj(n_ + 1)
+    {}
 
-    void add_edge(int u, int v, int w=1) override{
+    void reset(){
+        fill(pai.begin(), pai.end(), 0);
+        fill(dist.begin(), dist.end(), inf);
+        connected_components.clear();
+    }
+
+    void add_edge(int u, int v, T w=1) override{
+        (void)w;
         adj[u].push_back(v);
     }
 
@@ -30,31 +40,74 @@ public:
     void dfs(int v, int p){
         pai[v] = p;
         dist[v] = dist[p]+1;
+        connected_components.back().push_back(v);
         for(int u: adj[v]){
             if(dist[u] != inf) continue;
             dfs(u, v);
         }
     }
 
-    void run(int s=1) override{
-        // vai virar dist[s] + 1 = 0 depois
-        dist[s] = -1; 
+    void traverse_component(int s){
+        connected_components.emplace_back();
+        dist[s] = -1;
         dfs(s, s);
+    }
+
+    void run(int s=1) override{
+        reset();
+        traverse_component(s);
 
         for(int v=1; v<=n; v++){
             if(dist[v] != inf) continue;
-            dist[v] = -1;
-            dfs(v, v);
+            traverse_component(v);
         }
+
+        sort(connected_components.begin(), connected_components.end(),
+            [](const vector<int> &a, const vector<int> &b){
+                return a.size() > b.size();
+            }
+        );
     }
 
-    vector<int> get_dists(int s=1) const override {
-        (void)s;
+    void run_from(int s){
+        reset();
+        traverse_component(s);
+    }
+
+    T get_aprox_diameter(int s=1){
+        int v=s;
+        reset();
+        traverse_component(v);
+        for(int u=1; u<=n; u++){
+            if(dist[u] == inf) continue;
+            if(dist[u] > dist[v]) v = u;
+        }
+
+        reset();
+        traverse_component(v);
+        for(int u=1; u<=n; u++){
+            if(dist[u] == inf) continue;
+            if(dist[u] > dist[v]) v = u;
+        }
+
+        return dist[v];
+    }
+
+    T get_dist(int s, int t){
+        reset();
+        traverse_component(s);
+        return dist[t];
+    }
+
+    vector<vector<int>> get_components() const {
+        return connected_components;
+    }
+
+    vector<T> get_dists() const override {
         return dist;
     }
 
-    vector<int> get_tree(int s=1) const override {
-        (void)s;
+    vector<int> get_tree() const override {
         return pai;
     }
 
