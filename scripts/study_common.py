@@ -20,7 +20,6 @@ class GraphSpec:
     path: Path
     weighted: bool
     directed: bool
-    one_field_header: bool = False
 
 
 def specs_p1() -> list[GraphSpec]:
@@ -44,20 +43,19 @@ def specs_p2() -> list[GraphSpec]:
 
 def specs_p3() -> list[GraphSpec]:
     return [
-        GraphSpec(path, True, True, True)
+        GraphSpec(path, True, True)
         for path in sorted(INPUT.glob("grafo_DP_*.txt"))
     ]
 
 
-def header(spec: GraphSpec) -> tuple[int, int | None]:
+def header(spec: GraphSpec) -> tuple[int, int]:
     with spec.path.open(encoding="utf-8") as source:
         fields = source.readline().split()
-    expected = 1 if spec.one_field_header else 2
-    if len(fields) != expected:
+    if len(fields) != 2:
         raise ValueError(f"Cabeçalho inválido em {spec.path}: {fields}")
     n = int(fields[0])
-    m = None if spec.one_field_header else int(fields[1])
-    if n < 1 or (m is not None and m < 0):
+    m = int(fields[1])
+    if n < 1 or m < 0:
         raise ValueError(f"Dimensões inválidas em {spec.path}: {fields}")
     return n, m
 
