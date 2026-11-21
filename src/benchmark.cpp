@@ -38,6 +38,7 @@ struct GraphInput{
     int vertex_count;
     size_t input_edges;
     graph_io::EdgeWeightFormat weight_format;
+    bool directed_only;
 };
 
 string csv_quote(const string& value){
@@ -68,15 +69,17 @@ GraphInput inspect_graph(const filesystem::path& path){
     const graph_io::Header header = graph_io::read_header(input);
 
     const string name = path.filename().string();
+    const bool directed_only = name.rfind("grafo_DP_", 0) == 0;
     const bool weighted = name.rfind("grafo_W_", 0) == 0 ||
-        name == "rede_colaboracao.txt";
+        name == "rede_colaboracao.txt" || directed_only;
     return {
         path,
         header.vertex_count,
         header.edge_count,
         weighted
             ? graph_io::EdgeWeightFormat::weighted
-            : graph_io::EdgeWeightFormat::unweighted
+            : graph_io::EdgeWeightFormat::unweighted,
+        directed_only
     };
 }
 
@@ -135,10 +138,12 @@ void benchmark_algorithm(
     bool ignore_input_weights
 ){
     const Algorithm eligibility_probe(0);
-    const array<graph_io::GraphDirection, 2> directions{{
-        graph_io::GraphDirection::directed,
-        graph_io::GraphDirection::undirected
-    }};
+    vector<graph_io::GraphDirection> directions{
+        graph_io::GraphDirection::directed
+    };
+    if(!graph.directed_only){
+        directions.push_back(graph_io::GraphDirection::undirected);
+    }
 
     cerr << "[benchmark] Iniciando " << name << "...\n";
     for(graph_io::GraphDirection direction : directions){
@@ -148,6 +153,17 @@ void benchmark_algorithm(
             throw overflow_error("Contagem de arcos excede size_t.");
         }
         const size_t arc_count = graph.input_edges * multiplier;
+        // Os grafos DP têm pesos negativos, incompatíveis com Dijkstra.
+        if(graph.directed_only &&
+           (is_same_v<Algorithm, Djikstra<double>> ||
+            is_same_v<Algorithm, VectorDjikstra<double>>)){
+            cerr << "[benchmark] Ignorando " << name << " | "
+                 << graph.path.filename() << ": pesos negativos.\n";
+            print_skipped(
+                output, name, graph, direction, arc_count, "negative_weights"
+            );
+            continue;
+        }
         const int estimated_arc_count = arc_count >
                 static_cast<size_t>(numeric_limits<int>::max())
             ? numeric_limits<int>::max()
