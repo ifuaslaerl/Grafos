@@ -28,14 +28,37 @@ def collect(spec):
         "summary": info,
     }
 
-    result["bellman_ford_to_100"] = {
-        "status": "pending_src_api",
-        "reason": "multiple_source_runs_need_state_reset_or_reuse",
-    }
-    result["bellman_ford_negative_cycle"] = {
-        "status": "pending_src_api",
-        "reason": "multiple_source_runs_need_state_reset_or_reuse",
-    }
+    target = 100
+    sources = (10, 20, 30)
+    if not grafos.BellmanFord(0).should_run(n, arcs):
+        result["bellman_ford_to_100"] = {
+            "status": "skipped",
+            "reason": "algorithm_memory_budget",
+        }
+        result["bellman_ford_negative_cycle"] = None
+    elif target > n:
+        result["bellman_ford_to_100"] = {
+            "status": "skipped",
+            "reason": "target_out_of_range",
+        }
+        result["bellman_ford_negative_cycle"] = None
+    else:
+        bellman = load_algorithm(spec, grafos.BellmanFord)
+        distances = {}
+        negative_cycle = False
+        limit_exceeded = False
+        for source in sources:
+            if source > n:
+                continue
+            distances[str(source)] = distance(bellman.get_dist(source, target))
+            negative_cycle = negative_cycle or bellman.has_negative_cycle()
+            limit_exceeded = limit_exceeded or bellman.iteration_limit_exceeded
+        result["bellman_ford_to_100"] = {
+            "status": "iteration_limit" if limit_exceeded else "ok",
+            "distances": distances,
+        }
+        result["bellman_ford_negative_cycle"] = negative_cycle
+        del bellman
 
     if not grafos.FloydWarshall(0).should_run(n, arcs):
         result["floyd_warshall_pairs"] = {
