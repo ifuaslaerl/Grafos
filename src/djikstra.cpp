@@ -31,6 +31,7 @@ public:
         fill(dist.begin(), dist.end(), inf);
         fill(pai.begin(), pai.end(), 0);
         conected_components.clear();
+        this->zerar_contador();
     }
 
     void add_edge(int u, int v, T w=1) override{
@@ -56,6 +57,7 @@ public:
         dist[s] = 0;
 
         while(!fila.empty()){
+            if(!this->contar()) return;
             auto[current_distance, v] = fila.top();
             fila.pop();
             if(current_distance != dist[v]) continue;
@@ -63,6 +65,7 @@ public:
             conected_components.back().push_back(v);
 
             for(auto[u, w]: adj[v]){
+                if(!this->contar()) return;
                 if(dist[u] <= dist[v] + w) continue;
                 pai[u] = v;
                 dist[u] = dist[v] + w;
@@ -76,6 +79,7 @@ public:
         go(s);
 
         for(int v=1; v<=n; v++){
+            if(this->limite_excedido) return;
             if(dist[v] != inf) continue;
             go(v);
         }

@@ -41,6 +41,8 @@ void bind_algorithm(py::module_ &module, const char* name){
             },
             py::arg("edges")
         )
+        .def_readonly("iterations", &Algorithm::cont)
+        .def_readonly("iteration_limit_exceeded", &Algorithm::limite_excedido)
         .def(
             "should_run",
             [](const Algorithm &instance, int vertex_count, int edge_count){

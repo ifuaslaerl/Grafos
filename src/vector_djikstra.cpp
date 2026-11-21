@@ -28,6 +28,7 @@ public:
         fill(dist.begin(), dist.end(), inf);
         fill(pai.begin(), pai.end(), 0);
         connected_components.clear();
+        this->zerar_contador();
     }
 
     void add_edge(int u, int v, T w=1) override{
@@ -48,6 +49,7 @@ public:
         for(int i=0; i<n; i++){
             int v = 0;
             for(int u=1; u<=n; u++){
+                if(!this->contar()) return;
                 if(visited[u] || dist[u] == inf) continue;
                 if(v == 0 || dist[u] < dist[v]) v = u;
             }
@@ -56,6 +58,7 @@ public:
             visited[v] = 1;
             connected_components.back().push_back(v);
             for(const auto &[u, w]: adj[v]){
+                if(!this->contar()) return;
                 if(dist[v] + w >= dist[u]) continue;
                 dist[u] = dist[v] + w;
                 pai[u] = v;
@@ -68,6 +71,7 @@ public:
         go(s);
 
         for(int v=1; v<=n; v++){
+            if(this->limite_excedido) return;
             if(dist[v] != inf) continue;
             go(v);
         }

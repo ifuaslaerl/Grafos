@@ -9,6 +9,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <thread>
+#include <type_traits>
 #include <utility>
 #include <unistd.h>
 #include <sys/types.h>
@@ -19,6 +20,7 @@ namespace performance{
 struct RunMeasurement{
     long long elapsed_nanoseconds;
     size_t peak_rss_delta_bytes;
+    bool limit_exceeded;
 };
 
 inline size_t read_rss_bytes(std::ifstream& statm){
@@ -93,8 +95,13 @@ RunMeasurement measure_run_in_process(Function&& function){
     started.store(true, std::memory_order_release);
     const auto start = std::chrono::steady_clock::now();
     std::exception_ptr run_error;
+    bool limit_exceeded = false;
     try{
-        function();
+        if constexpr(std::is_void_v<std::invoke_result_t<Function&>>){
+            function();
+        } else{
+            limit_exceeded = function();
+        }
     } catch(...){
         run_error = std::current_exception();
     }
@@ -111,7 +118,8 @@ RunMeasurement measure_run_in_process(Function&& function){
 
     return {
         std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count(),
-        peak_delta.load(std::memory_order_relaxed)
+        peak_delta.load(std::memory_order_relaxed),
+        limit_exceeded
     };
 }
 

@@ -9,7 +9,22 @@ typedef long long ll;
 template<typename T>
 class IAlgorithm{
 public:
-    static constexpr int operation_budget = 2e9;
+    static constexpr int operation_budget = 15e8;
+
+    ll cont = 0;
+    bool limite_excedido = false;
+
+    void zerar_contador(){
+        cont = 0;
+        limite_excedido = false;
+    }
+
+    // Conta uma iteração; retorna false quando o limite fixo é excedido.
+    bool contar(){
+        if(limite_excedido) return false;
+        if(++cont > operation_budget) limite_excedido = true;
+        return !limite_excedido;
+    }
 
     IAlgorithm() = default;
     virtual ~IAlgorithm() = default;

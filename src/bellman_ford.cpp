@@ -36,6 +36,7 @@ public:
         fill(pai.begin(), pai.end(), 0);
         fill(dist.begin(), dist.end(), inf);
         negative_cicle = false;
+        this->zerar_contador();
     }
 
     void add_edge(int u, int v, T w=1) override{
@@ -53,14 +54,18 @@ public:
         pai[s] = s;
 
         for(int k=1; k<=n; k++){
-            for(Edge e: edges){
+            bool mudou=false;
+            for(Edge &e: edges){
+                if(!this->contar()) return;
                 auto[u, v, w] = e;
                 if(dist[u] == inf) continue;
                 if(dist[v] <= dist[u] + w) continue;
                 if(k==n) negative_cicle = true;
                 dist[v] = dist[u] + w;
                 pai[v] = u;
+                mudou = true;
             }
+            if(!mudou) break;
         }
     }
 
