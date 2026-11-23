@@ -1,0 +1,17 @@
+algoritmo,grafo,n,arcos,tipo,erro_abs_max,erro_rel_max,pares_erro_rel_maior_1e-3,pares_comparados,alcance_divergente
+FloydWarshall_original_vs_paralelo,random_n250_m1000,250,2000,double,0,0,0,62500,0
+FloydWarshall,random_n250_m1000,250,2000,float,1.90735e-07,1.53015e-07,0,62500,0
+FloydWarshall,random_n250_m1000,250,2000,float16,0.0015625,0.00131226,56,62500,0
+FloydWarshall_original_vs_paralelo,random_n500_m2000,500,4000,double,0,0,0,250000,0
+FloydWarshall,random_n500_m2000,500,4000,float,2.24113e-07,1.738e-07,0,250000,0
+FloydWarshall,random_n500_m2000,500,4000,float16,0.00199219,0.00164644,416,250000,0
+FloydWarshall_original_vs_paralelo,random_n750_m3000,750,6000,double,0,0,0,562500,0
+FloydWarshall,random_n750_m3000,750,6000,float,2.09808e-07,1.87329e-07,0,562500,0
+FloydWarshall,random_n750_m3000,750,6000,float16,0.00234375,0.0015625,950,562500,0
+FloydWarshall_original_vs_paralelo,random_n1000_m4000,1000,8000,double,0,0,0,1000000,0
+FloydWarshall,random_n1000_m4000,1000,8000,float,2.28882e-07,2.01904e-07,0,1000000,0
+FloydWarshall,random_n1000_m4000,1000,8000,float16,0.00210938,0.00157416,1704,1000000,0
+FloydWarshall,random_n1500_m6000,1500,12000,float,3.24249e-07,1.92569e-07,0,2250000,0
+FloydWarshall,random_n1500_m6000,1500,12000,float16,0.0025,0.00173611,5172,2250000,0
+FloydWarshall,random_n2000_m8000,2000,16000,float,3.05176e-07,2.08616e-07,0,4000000,0
+FloydWarshall,random_n2000_m8000,2000,16000,float16,0.00242188,0.00187703,8806,4000000,0

@@ -1,0 +1,4 @@
+bench_optimize
+bench_optimize.exe
+resultados/*_log.txt
+__pycache__/
